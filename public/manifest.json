@@ -1,0 +1,10 @@
+{
+  "name": "EBC Workforce CRM",
+  "short_name": "EBC CRM",
+  "description": "EBC/JPFD Workforce CRM — duty board, leave, payroll, and overtime management",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f1115",
+  "theme_color": "#b91c1c",
+  "icons": []
+}
