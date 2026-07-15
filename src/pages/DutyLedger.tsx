@@ -37,7 +37,7 @@ export default function DutyLedger() {
     { key: 'station', header: 'Station', render: (r) => r.station, hideAt: ['md'] },
     { key: 'platoon', header: 'Platoon', render: (r) => <PlatoonChip t={t} platoon={r.platoon} /> },
     { key: 'status', header: 'Status', render: (r) => <StatusChip t={t} status={r.duty_status} /> },
-    { key: 'hours', header: 'Hours', render: (r) => r.hours_worked, hideAt: ['md', 'lg'] },
+    { key: 'hours', header: 'Hours', render: (r) => parseFloat(r.hours_worked).toFixed(2), hideAt: ['md', 'lg'] },
     { key: 'acting', header: 'Acting Note', render: (r) => r.acting_note ?? '—' },
   ];
 

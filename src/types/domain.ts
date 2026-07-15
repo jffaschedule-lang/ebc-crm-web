@@ -90,6 +90,8 @@ export interface LeaveRecord {
   sl_dental: boolean;
   sl_optical: boolean;
   sl_death: boolean;
+  /** Present when the list query joins `employees!inner(platoon)` (see GET /api/leave-records). */
+  employees?: { platoon: Platoon };
 }
 
 export interface AlSlotLedger {

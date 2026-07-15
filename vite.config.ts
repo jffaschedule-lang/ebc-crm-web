@@ -12,5 +12,13 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          react: ['react', 'react-dom', 'react-router-dom'],
+          vendor: ['@supabase/supabase-js', '@tanstack/react-query', 'axios', 'zustand'],
+        },
+      },
+    },
   },
 });

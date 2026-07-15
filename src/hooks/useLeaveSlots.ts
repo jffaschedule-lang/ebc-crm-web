@@ -28,8 +28,10 @@ export function useSubmitLeave() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (payload: SubmitLeavePayload) => apiPost<LeaveRecord>('/api/leave', payload),
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['slots', undefined, variables.shift_date] });
+    onSuccess: () => {
+      // Partial key match invalidates every ['slots', platoon, date] query —
+      // the mutation doesn't know the employee's platoon at this point.
+      queryClient.invalidateQueries({ queryKey: ['slots'] });
       queryClient.invalidateQueries({ queryKey: ['leave-records'] });
     },
   });

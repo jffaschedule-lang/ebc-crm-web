@@ -46,7 +46,10 @@ export default function LeaveRecords() {
   const waitlist = records.filter((r) => r.status === 'Waitlist');
   const firstWaitlisted = waitlist[0];
 
-  const { data: slotLedger } = useLeaveSlots('A', firstWaitlisted?.shift_date ?? '');
+  const { data: slotLedger } = useLeaveSlots(
+    firstWaitlisted?.employees?.platoon ?? '',
+    firstWaitlisted?.shift_date ?? ''
+  );
 
   const cols: RTableColumn<LeaveRecord>[] = [
     { key: 'entry_id', header: 'Entry ID', render: (r) => r.entry_id, hideAt: ['md'] },
