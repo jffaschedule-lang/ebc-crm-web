@@ -3,7 +3,7 @@
 // project constraint #4). DATE/TIME columns are plain strings — format with
 // date-fns for display, never `new Date()` for shift-date logic.
 
-export type Rank = 'DC' | 'Sub-DC' | 'Capt' | 'Sub-CAPT' | 'LT' | 'Sub-LT' | 'OP' | 'FF';
+export type Rank = 'DC' | 'Sub-DC' | 'AC' | 'Capt' | 'Sub-CAPT' | 'LT' | 'Sub-LT' | 'OP' | 'FF';
 export type Platoon = 'A' | 'B' | 'C';
 export type EmployeeStatus = 'Active' | 'Inactive';
 
@@ -44,6 +44,7 @@ export interface Company {
   district: number | null;
   suffix_rule: string | null;
   records_only: boolean;
+  station_override: string | null;
 }
 
 export interface RotationDay {
