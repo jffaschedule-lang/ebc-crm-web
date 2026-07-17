@@ -4,7 +4,7 @@ import { useAppStore } from '../store/useAppStore';
 import { tokensFor } from '../theme/tokens';
 import { useBreakpoint, isMobile } from '../hooks/useBreakpoint';
 import { apiGet } from '../api/client';
-import { Employee } from '../types/domain';
+import { Employee, RANK_SENIORITY } from '../types/domain';
 import { MetricCard } from '../components/ui/MetricCard';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { AlertBar } from '../components/ui/AlertBar';
@@ -23,13 +23,15 @@ export default function Roster() {
 
   const [search, setSearch] = useState('');
   const [platoonFilter, setPlatoonFilter] = useState('');
+  const [rankFilter, setRankFilter] = useState('');
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['employees', search, platoonFilter],
+    queryKey: ['employees', search, platoonFilter, rankFilter],
     queryFn: () =>
       apiGet<Employee[]>('/api/employees', {
         search: search || undefined,
         platoon: platoonFilter || undefined,
+        rank: rankFilter || undefined,
         limit: 200,
       }),
   });
@@ -98,6 +100,22 @@ export default function Roster() {
           <option value="A">A</option>
           <option value="B">B</option>
           <option value="C">C</option>
+        </select>
+        <select
+          value={rankFilter}
+          onChange={(e) => setRankFilter(e.target.value)}
+          style={{
+            padding: '8px 10px',
+            borderRadius: 6,
+            border: `1px solid ${t.border}`,
+            background: t.surfaceAlt,
+            color: t.text,
+          }}
+        >
+          <option value="">All ranks</option>
+          {RANK_SENIORITY.map((r) => (
+            <option key={r} value={r}>{r}</option>
+          ))}
         </select>
       </div>
 

@@ -34,8 +34,11 @@ export default function DutyBoard() {
   if (rotationLoading || dutyLoading) return <LoadingSpinner t={t} size={32} />;
 
   const rows = dutyRows ?? [];
+  // Train is duty, not leave: excluded from the on-duty count (the employee is
+  // away from the station) but it must never be reported as leave.
   const onDuty = rows.filter((r) => r.duty_status === 'O').length;
-  const onLeave = rows.filter((r) => r.duty_status !== 'O').length;
+  const inTraining = rows.filter((r) => r.duty_status === 'Train').length;
+  const onLeave = rows.filter((r) => r.duty_status !== 'O' && r.duty_status !== 'Train').length;
   const needsAction = rows.filter((r) => r.acting_note);
   const mobile = isMobile(bp);
 
@@ -60,7 +63,7 @@ export default function DutyBoard() {
         }}
       >
         <MetricCard t={t} label="On Duty Today" value={onDuty} sub={rotation ? `Platoon ${rotation.platoon}` : ''} />
-        <MetricCard t={t} label="On Leave" value={onLeave} />
+        <MetricCard t={t} label="On Leave" value={onLeave} sub={inTraining > 0 ? `+${inTraining} in training` : ''} />
         <MetricCard t={t} label="Acting Assignments" value={needsAction.length} />
         <MetricCard t={t} label="Total Assigned" value={rows.length} />
       </div>

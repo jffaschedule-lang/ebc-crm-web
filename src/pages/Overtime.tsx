@@ -14,7 +14,7 @@ import { PlatoonChip } from '../components/ui/PlatoonChip';
 import { Pill } from '../components/ui/Pill';
 import { OTAvailabilityForm } from '../components/forms/OTAvailabilityForm';
 
-const RANK_GROUPS = ['dc', 'capt', 'lt', 'op', 'ff'];
+const RANK_GROUPS = ['ac', 'dc', 'capt', 'lt', 'op', 'ff'];
 const LADDER = ['T-24h', 'T-12h', 'T-1h', 'T-15m'];
 
 export default function Overtime() {

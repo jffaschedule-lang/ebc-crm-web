@@ -3,12 +3,22 @@
 // project constraint #4). DATE/TIME columns are plain strings — format with
 // date-fns for display, never `new Date()` for shift-date logic.
 
-export type Rank = 'DC' | 'Sub-DC' | 'AC' | 'Capt' | 'Sub-CAPT' | 'LT' | 'Sub-LT' | 'OP' | 'FF';
+export type Rank =
+  | 'AC' | 'Sub-AC' | 'DC' | 'Sub-DC' | 'Capt' | 'Sub-CAPT'
+  | 'LT' | 'Sub-LT' | 'OP' | 'Sub-OP' | 'FF' | 'Sub-FF';
+
+/** Canonical seniority order, most senior first — use for rank dropdowns and sorting. */
+export const RANK_SENIORITY: readonly Rank[] = [
+  'AC', 'Sub-AC', 'DC', 'Sub-DC', 'Capt', 'Sub-CAPT',
+  'LT', 'Sub-LT', 'OP', 'Sub-OP', 'FF', 'Sub-FF',
+];
 export type Platoon = 'A' | 'B' | 'C';
 export type EmployeeStatus = 'Active' | 'Inactive';
 
+// 'Train' is duty (not leave): the employee stays listed but is excluded from
+// on-duty counts, and keeps normal work credit on timesheet/payroll.
 export type DutyStatus =
-  | 'O' | 'AL' | 'SL' | 'EAL' | 'ISSL' | 'FODI' | 'ADM' | 'AWOL'
+  | 'O' | 'Train' | 'AL' | 'SL' | 'EAL' | 'ISSL' | 'FODI' | 'ADM' | 'AWOL'
   | 'FL' | 'CT' | 'CL' | 'DET' | 'MWA' | 'OWD';
 
 export type LeaveType =

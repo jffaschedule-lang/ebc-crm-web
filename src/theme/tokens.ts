@@ -14,6 +14,8 @@ export interface ThemeTokens {
   pC: string; // platoon C / green
   warn: string;
   warnBg: string;
+  train: string; // orange — Train duty status highlight
+  trainBg: string;
   crit: string;
   critBg: string;
   ok: string;
@@ -40,6 +42,8 @@ export const LIGHT: ThemeTokens = {
   pC: '#15803d',
   warn: '#92650b',
   warnBg: '#fef3c7',
+  train: '#c2410c',
+  trainBg: '#ffedd5',
   crit: '#b91c1c',
   critBg: '#fee2e2',
   ok: '#15803d',
@@ -66,6 +70,8 @@ export const DARK: ThemeTokens = {
   pC: '#22c55e',
   warn: '#facc15',
   warnBg: '#3f320b',
+  train: '#fb923c',
+  trainBg: '#43200b',
   crit: '#f87171',
   critBg: '#3f1414',
   ok: '#4ade80',

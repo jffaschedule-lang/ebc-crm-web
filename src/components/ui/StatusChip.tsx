@@ -9,6 +9,7 @@ interface StatusChipProps {
 function colorsFor(t: ThemeTokens, status: string): { fg: string; bg: string } {
   const map: Record<string, { fg: string; bg: string }> = {
     O: { fg: t.ok, bg: t.okBg },
+    Train: { fg: t.train, bg: t.trainBg },
     AL: { fg: t.info, bg: t.infoBg },
     SL: { fg: t.warn, bg: t.warnBg },
     EAL: { fg: t.warn, bg: t.warnBg },
