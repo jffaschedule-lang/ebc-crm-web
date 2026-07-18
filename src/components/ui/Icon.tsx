@@ -231,3 +231,22 @@ export function MapIcon({ size = 18, style }: IconProps) {
     </svg>
   );
 }
+
+export function EyeIcon({ size = 18, style }: IconProps) {
+  return (
+    <svg {...base(size)} style={style} aria-hidden>
+      <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  );
+}
+
+export function EyeOffIcon({ size = 18, style }: IconProps) {
+  return (
+    <svg {...base(size)} style={style} aria-hidden>
+      <path d="M3 3l18 18" />
+      <path d="M10.6 5.6C11.06 5.53 11.53 5.5 12 5.5c6 0 9.5 6.5 9.5 6.5a15 15 0 01-3.2 3.9M6.6 6.9A15 15 0 002.5 12S6 18.5 12 18.5c1.13 0 2.19-.23 3.16-.62" />
+      <path d="M9.9 9.9a3 3 0 004.2 4.2" />
+    </svg>
+  );
+}

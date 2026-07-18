@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../store/useAppStore';
 import { tokensFor } from '../theme/tokens';
 import { useAuth } from '../auth/useAuth';
-import { useSetupFirstAdmin } from '../hooks/useAdmin';
+import { useBootstrapFirstEmployee, useBootstrapStatus, useSetupFirstAdmin } from '../hooks/useAdmin';
 import { AlertBar } from '../components/ui/AlertBar';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { MIN_TAP_TARGET } from '../theme/spacing';
@@ -16,14 +16,34 @@ export default function SetupWizard() {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const setupFirstAdmin = useSetupFirstAdmin();
+  const bootstrapEmployee = useBootstrapFirstEmployee();
+  const { data: bootstrapStatus } = useBootstrapStatus();
   const [step, setStep] = useState<Step>('welcome');
+  const [usedBypass, setUsedBypass] = useState(false);
 
   const handleBecomeAdmin = () => {
     setStep('admin-result');
+    setUsedBypass(false);
     if (user?.email) {
       setupFirstAdmin.mutate(user.email);
     }
   };
+
+  const handleCreateSystemAdmin = () => {
+    setUsedBypass(true);
+    bootstrapEmployee.mutate(undefined, {
+      onSuccess: () => {
+        if (user?.email) {
+          setupFirstAdmin.mutate(user.email);
+        }
+      },
+    });
+  };
+
+  const setupError = setupFirstAdmin.error as { error?: { code?: string; message?: string } } | null;
+  const isNoEmployeeError = setupError?.error?.code === 'EMPLOYEE_NOT_FOUND';
+  const canOfferBypass = isNoEmployeeError && !usedBypass && bootstrapStatus && !bootstrapStatus.adminExists;
+  const bootstrapError = bootstrapEmployee.error as { error?: { message?: string } } | null;
 
   const primaryButtonStyle: React.CSSProperties = {
     width: '100%',
@@ -49,6 +69,18 @@ export default function SetupWizard() {
     fontWeight: 600,
     fontSize: 14,
     cursor: 'pointer',
+  };
+  const codeBlockStyle: React.CSSProperties = {
+    display: 'block',
+    whiteSpace: 'pre-wrap',
+    background: t.surfaceAlt,
+    border: `1px solid ${t.border}`,
+    borderRadius: 6,
+    padding: 10,
+    fontSize: 12,
+    fontFamily: 'ui-monospace, SF Mono, Consolas, monospace',
+    color: t.text,
+    margin: '10px 0',
   };
 
   return (
@@ -112,32 +144,70 @@ export default function SetupWizard() {
 
         {step === 'admin-result' && (
           <>
-            {setupFirstAdmin.isPending && (
+            {(setupFirstAdmin.isPending || bootstrapEmployee.isPending) && (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
                 <LoadingSpinner t={t} size={28} />
-                <p style={{ color: t.textMuted, fontSize: 13 }}>Setting up your admin account…</p>
+                <p style={{ color: t.textMuted, fontSize: 13 }}>
+                  {bootstrapEmployee.isPending ? 'Creating system admin employee record…' : 'Setting up your admin account…'}
+                </p>
               </div>
             )}
 
-            {setupFirstAdmin.isSuccess && (
+            {setupFirstAdmin.isSuccess && !setupFirstAdmin.isPending && (
               <>
-                <h1 style={{ color: t.text, fontSize: 20, marginTop: 0, marginBottom: 12 }}>Admin account configured!</h1>
+                <h1 style={{ color: t.text, fontSize: 20, marginTop: 0, marginBottom: 12 }}>
+                  {usedBypass ? 'Admin account ready.' : 'Admin account configured!'}
+                </h1>
                 <p style={{ color: t.textMuted, fontSize: 13, marginBottom: 24 }}>
                   You can now access all settings.
                 </p>
-                <button type="button" onClick={() => navigate('/settings')} style={primaryButtonStyle}>
-                  Go to Settings
+                <button
+                  type="button"
+                  onClick={() => navigate(usedBypass ? '/' : '/settings')}
+                  style={primaryButtonStyle}
+                >
+                  {usedBypass ? 'Go to dashboard' : 'Go to Settings'}
                 </button>
               </>
             )}
 
-            {setupFirstAdmin.isError && (
+            {!setupFirstAdmin.isPending && !bootstrapEmployee.isPending && !setupFirstAdmin.isSuccess && (setupFirstAdmin.isError || bootstrapEmployee.isError) && (
               <>
                 <h1 style={{ color: t.text, fontSize: 20, marginTop: 0, marginBottom: 12 }}>Couldn't set up admin</h1>
-                <AlertBar t={t} type="crit">
-                  {(setupFirstAdmin.error as { error?: { message?: string } })?.error?.message ??
-                    'Something went wrong setting up your account.'}
-                </AlertBar>
+
+                {bootstrapEmployee.isError && (
+                  <AlertBar t={t} type="crit">
+                    {bootstrapError?.error?.message ?? 'Something went wrong creating the system admin record.'}
+                  </AlertBar>
+                )}
+
+                {setupFirstAdmin.isError && isNoEmployeeError ? (
+                  <AlertBar t={t} type="crit">
+                    <span>
+                      Your email ({user?.email}) is not linked to any employee record in the system.
+                      <br />
+                      <br />
+                      To fix this, ask someone with Supabase access to run this SQL:
+                      <code style={codeBlockStyle}>
+                        {`UPDATE employees\nSET email = '${user?.email}'\nWHERE emp_number = YOUR_EMPLOYEE_NUMBER;`}
+                      </code>
+                      Then come back and try again.
+                    </span>
+                  </AlertBar>
+                ) : (
+                  setupFirstAdmin.isError && (
+                    <AlertBar t={t} type="crit">
+                      {setupError?.error?.message ?? 'Something went wrong setting up your account.'}
+                    </AlertBar>
+                  )
+                )}
+
+                {canOfferBypass && (
+                  <button type="button" onClick={handleCreateSystemAdmin} style={primaryButtonStyle}>
+                    Create System Admin Account (First-time setup only)
+                  </button>
+                )}
+
                 <button type="button" onClick={() => setStep('welcome')} style={secondaryButtonStyle}>
                   Back
                 </button>

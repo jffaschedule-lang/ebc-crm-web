@@ -219,3 +219,13 @@ export interface SystemInfo {
   timezone: string;
   nextPacketRun: string;
 }
+
+export interface StaffAccount {
+  emp_number: number;
+  name: string;
+  email: string;
+  role: AppRole;
+  roles: AppRole[];
+  last_sign_in: string | null;
+  status: EmployeeStatus;
+}

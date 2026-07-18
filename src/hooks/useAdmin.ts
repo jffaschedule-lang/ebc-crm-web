@@ -5,6 +5,7 @@ import {
   AppRole,
   NotificationRule,
   RoleAssignment,
+  StaffAccount,
   SystemInfo,
 } from '../types/domain';
 
@@ -94,5 +95,60 @@ export function useUpdateNotificationRule() {
 export function useSendTestEmail() {
   return useMutation({
     mutationFn: (to: string) => apiPost<{ sent: boolean }>('/api/admin/test-email', { to }),
+  });
+}
+
+export function useStaffAccounts(enabled: boolean) {
+  return useQuery({
+    queryKey: ['admin', 'staff-accounts'],
+    queryFn: () => apiGet<StaffAccount[]>('/api/admin/staff-accounts'),
+    enabled,
+  });
+}
+
+export interface CreateStaffAccountInput {
+  email: string;
+  password: string;
+  emp_number: number;
+  role: AppRole;
+}
+
+export interface CreateStaffAccountResult {
+  employeeId: string;
+  authUserId: string;
+  emp_number: number;
+  name: string;
+  email: string;
+  role: AppRole;
+}
+
+export function useCreateStaffAccount() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: CreateStaffAccountInput) =>
+      apiPost<CreateStaffAccountResult>('/api/admin/create-staff-account', payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'staff-accounts'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'roles'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+    },
+  });
+}
+
+export function useRemoveStaffAccount() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (empNumber: number) => apiDelete<{ removed: boolean }>(`/api/admin/staff-accounts/${empNumber}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'staff-accounts'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'roles'] });
+      queryClient.invalidateQueries({ queryKey: ['me'] });
+    },
+  });
+}
+
+export function useBootstrapFirstEmployee() {
+  return useMutation({
+    mutationFn: () => apiPost<{ employeeId: string; empNumber: number }>('/api/admin/bootstrap-first-employee'),
   });
 }
