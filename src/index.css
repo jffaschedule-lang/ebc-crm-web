@@ -78,6 +78,12 @@ textarea:focus-visible,
   background: transparent;
 }
 
+@keyframes ebc-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

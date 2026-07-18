@@ -187,3 +187,29 @@ export function LogOutIcon({ size = 18, style }: IconProps) {
     </svg>
   );
 }
+
+export function PencilIcon({ size = 18, style }: IconProps) {
+  return (
+    <svg {...base(size)} style={style} aria-hidden>
+      <path d="M4 20l.9-4.2L15.6 5a1.8 1.8 0 012.6 0l.8.8a1.8 1.8 0 010 2.6L8.2 19.1 4 20z" />
+      <path d="M13.5 6.5l4 4" />
+    </svg>
+  );
+}
+
+export function XIcon({ size = 18, style }: IconProps) {
+  return (
+    <svg {...base(size)} style={style} aria-hidden>
+      <path d="M6 6l12 12M18 6L6 18" />
+    </svg>
+  );
+}
+
+export function CheckCircleIcon({ size = 18, style }: IconProps) {
+  return (
+    <svg {...base(size)} style={style} aria-hidden>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M8.3 12.3l2.6 2.6 5-5.4" />
+    </svg>
+  );
+}

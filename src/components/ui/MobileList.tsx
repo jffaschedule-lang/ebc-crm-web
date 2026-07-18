@@ -8,9 +8,11 @@ interface MobileListProps<T> {
   renderItem: (row: T) => ReactNode;
   /** Plain-language empty state, e.g. "No leave requests pending." Defaults to a generic message. */
   emptyMessage?: string;
+  /** Optional per-row style override, e.g. dimming inactive records. */
+  rowStyle?: (row: T) => React.CSSProperties;
 }
 
-export function MobileList<T>({ t, rows, rowKey, renderItem, emptyMessage }: MobileListProps<T>) {
+export function MobileList<T>({ t, rows, rowKey, renderItem, emptyMessage, rowStyle }: MobileListProps<T>) {
   return (
     <div style={{ border: `1px solid ${t.border}`, borderRadius: 10, overflow: 'hidden' }}>
       {rows.map((row, i) => (
@@ -21,6 +23,7 @@ export function MobileList<T>({ t, rows, rowKey, renderItem, emptyMessage }: Mob
             minHeight: 44,
             borderTop: i === 0 ? 'none' : `1px solid ${t.border}`,
             background: t.surface,
+            ...rowStyle?.(row),
           }}
         >
           {renderItem(row)}

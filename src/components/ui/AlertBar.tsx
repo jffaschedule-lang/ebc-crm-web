@@ -1,17 +1,17 @@
 import { ReactNode } from 'react';
 import { ThemeTokens } from '../../theme/tokens';
-import { AlertTriangleIcon, AlertCircleIcon } from './Icon';
+import { AlertTriangleIcon, AlertCircleIcon, CheckCircleIcon } from './Icon';
 
 interface AlertBarProps {
   t: ThemeTokens;
-  type: 'warn' | 'crit';
+  type: 'warn' | 'crit' | 'ok';
   children: ReactNode;
 }
 
 export function AlertBar({ t, type, children }: AlertBarProps) {
-  const color = type === 'crit' ? t.crit : t.warn;
-  const bg = type === 'crit' ? t.critBg : t.warnBg;
-  const Icon = type === 'crit' ? AlertCircleIcon : AlertTriangleIcon;
+  const color = type === 'crit' ? t.crit : type === 'ok' ? t.ok : t.warn;
+  const bg = type === 'crit' ? t.critBg : type === 'ok' ? t.okBg : t.warnBg;
+  const Icon = type === 'crit' ? AlertCircleIcon : type === 'ok' ? CheckCircleIcon : AlertTriangleIcon;
 
   return (
     <div

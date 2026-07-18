@@ -23,9 +23,11 @@ interface RTableProps<T> {
   emptyMessage?: string;
   /** Caps the scroll area height so the sticky header actually has something to stick within. */
   maxHeight?: number;
+  /** Optional per-row style override, e.g. dimming inactive records. */
+  rowStyle?: (row: T) => React.CSSProperties;
 }
 
-export function RTable<T>({ t, bp, cols, rows, rowKey, emptyMessage, maxHeight }: RTableProps<T>) {
+export function RTable<T>({ t, bp, cols, rows, rowKey, emptyMessage, maxHeight, rowStyle }: RTableProps<T>) {
   const visibleCols = cols.filter((c) => !c.hideAt?.includes(bp));
 
   return (
@@ -58,7 +60,7 @@ export function RTable<T>({ t, bp, cols, rows, rowKey, emptyMessage, maxHeight }
         </thead>
         <tbody>
           {rows.map((row) => (
-            <tr key={rowKey(row)} style={{ borderBottom: `1px solid ${t.border}` }}>
+            <tr key={rowKey(row)} style={{ borderBottom: `1px solid ${t.border}`, ...rowStyle?.(row) }}>
               {visibleCols.map((col) => (
                 <td
                   key={col.key}
