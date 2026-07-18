@@ -134,8 +134,12 @@ export interface TimesheetSegment {
   pp_end: string;
   shift_date: string;
   segment_type: 'work' | 'leave';
+  date_in: string | null;
+  date_out: string | null;
   time_in: string | null;
   time_out: string | null;
+  leave_start_date: string | null;
+  leave_end_date: string | null;
   leave_time_in: string | null;
   leave_time_out: string | null;
   hours: string;

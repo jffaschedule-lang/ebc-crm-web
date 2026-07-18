@@ -25,9 +25,11 @@ interface RTableProps<T> {
   maxHeight?: number;
   /** Optional per-row style override, e.g. dimming inactive records. */
   rowStyle?: (row: T) => React.CSSProperties;
+  /** Optional totals row rendered after all data rows, bold with a top border. Keyed by column so it stays aligned when columns hide per breakpoint. */
+  footer?: (col: RTableColumn<T>) => ReactNode;
 }
 
-export function RTable<T>({ t, bp, cols, rows, rowKey, emptyMessage, maxHeight, rowStyle }: RTableProps<T>) {
+export function RTable<T>({ t, bp, cols, rows, rowKey, emptyMessage, maxHeight, rowStyle, footer }: RTableProps<T>) {
   const visibleCols = cols.filter((c) => !c.hideAt?.includes(bp));
 
   return (
@@ -82,6 +84,24 @@ export function RTable<T>({ t, bp, cols, rows, rowKey, emptyMessage, maxHeight, 
               <td colSpan={visibleCols.length} style={{ padding: 20, textAlign: 'center', color: t.textFaint, fontSize: 13 }}>
                 {emptyMessage ?? 'No records to show.'}
               </td>
+            </tr>
+          )}
+          {footer && rows.length > 0 && (
+            <tr style={{ borderTop: `2px solid ${t.border}`, fontWeight: 700 }}>
+              {visibleCols.map((col) => (
+                <td
+                  key={col.key}
+                  style={{
+                    padding: '8px 12px',
+                    color: t.text,
+                    textAlign: col.numeric ? 'right' : 'left',
+                    fontFamily: col.numeric ? FONT_MONO : undefined,
+                    fontVariantNumeric: col.numeric ? 'tabular-nums' : undefined,
+                  }}
+                >
+                  {footer(col)}
+                </td>
+              ))}
             </tr>
           )}
         </tbody>
