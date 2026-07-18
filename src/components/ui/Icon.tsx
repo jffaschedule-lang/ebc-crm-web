@@ -213,3 +213,21 @@ export function CheckCircleIcon({ size = 18, style }: IconProps) {
     </svg>
   );
 }
+
+export function BellIcon({ size = 18, style }: IconProps) {
+  return (
+    <svg {...base(size)} style={style} aria-hidden>
+      <path d="M6 10.5a6 6 0 1112 0c0 4 1.3 5.4 2 6.2H4c.7-.8 2-2.2 2-6.2z" />
+      <path d="M10 19.5a2 2 0 004 0" />
+    </svg>
+  );
+}
+
+export function MapIcon({ size = 18, style }: IconProps) {
+  return (
+    <svg {...base(size)} style={style} aria-hidden>
+      <path d="M9 4.5L4 6.5v13l5-2 6 2 5-2v-13l-5 2-6-2z" />
+      <path d="M9 4.5v13M15 6.5v13" />
+    </svg>
+  );
+}

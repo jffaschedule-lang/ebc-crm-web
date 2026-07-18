@@ -188,3 +188,34 @@ export interface OtRequest {
   filled_by: string | null;
   ladder_stage: string | null;
 }
+
+export interface RoleAssignment {
+  id: string;
+  employee_id: string;
+  role: AppRole;
+  assigned_at: string;
+  assigned_by: string | null;
+  employees?: { last_name: string; first_name: string; emp_number: number; email: string | null };
+}
+
+export interface AdminAuthUser {
+  id: string;
+  email: string | null;
+  created_at: string;
+  last_sign_in_at: string | null;
+}
+
+export interface NotificationRule {
+  event: string;
+  enabled: boolean;
+  recipients: string;
+  description: string | null;
+  updated_at: string;
+}
+
+export interface SystemInfo {
+  emailProvider: string;
+  rotationRange: { start: string | null; end: string | null; days: number };
+  timezone: string;
+  nextPacketRun: string;
+}

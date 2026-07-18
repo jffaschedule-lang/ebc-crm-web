@@ -2,6 +2,7 @@ import { useAppStore } from '../store/useAppStore';
 import { tokensFor } from '../theme/tokens';
 import { useBreakpoint, isMobile } from '../hooks/useBreakpoint';
 import { useAuditLog } from '../hooks/useAuditLog';
+import { useMyRole } from '../hooks/useMyRole';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { AlertBar } from '../components/ui/AlertBar';
 import { RTable, RTableColumn } from '../components/ui/RTable';
@@ -15,9 +16,11 @@ export default function Audit() {
   const bp = useBreakpoint();
   const mobile = isMobile(bp);
 
+  const { roles, isLoading: roleLoading } = useMyRole();
   const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useAuditLog();
 
   const rows = data?.pages.flat() ?? [];
+  const hasNoRole = !roleLoading && roles.length === 0;
 
   const cols: RTableColumn<AuditLogEntry>[] = [
     { key: 'occurred_at', header: 'When', render: (r) => new Date(r.occurred_at).toLocaleString() },
@@ -27,12 +30,22 @@ export default function Audit() {
     { key: 'detail', header: 'Detail', render: (r) => r.detail ?? '' },
   ];
 
+  if (hasNoRole) {
+    return (
+      <AlertBar t={t} type="warn">
+        Your account has no role assigned yet. Ask the admin to assign your role in Settings → User Roles.
+      </AlertBar>
+    );
+  }
+
   return (
     <div>
-      {isLoading && <LoadingSpinner t={t} size={32} />}
-      {error && <AlertBar t={t} type="crit">Couldn't load the audit log — this view requires the supervisor role.</AlertBar>}
+      {(isLoading || roleLoading) && <LoadingSpinner t={t} size={32} />}
+      {!roleLoading && error && (
+        <AlertBar t={t} type="crit">Couldn't load the audit log — this view requires the supervisor or admin role.</AlertBar>
+      )}
 
-      {!isLoading && !error && (
+      {!isLoading && !roleLoading && !error && (
         <>
           <RTable
             t={t}

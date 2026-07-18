@@ -1,17 +1,20 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { useQuery } from '@tanstack/react-query';
 import { useAppStore } from '../store/useAppStore';
 import { tokensFor } from '../theme/tokens';
 import { useBreakpoint, isMobile, isTablet } from '../hooks/useBreakpoint';
 import { apiGet } from '../api/client';
+import { useMyRole } from '../hooks/useMyRole';
+import { useGenerateDutyLedger } from '../hooks/useDutyLedger';
 import { MetricCard } from '../components/ui/MetricCard';
-import { LoadingSpinner } from '../components/ui/LoadingSpinner';
+import { LoadingSpinner, InlineSpinner } from '../components/ui/LoadingSpinner';
 import { AlertBar } from '../components/ui/AlertBar';
 import { Card } from '../components/ui/Card';
 import { ProgressBar } from '../components/ui/ProgressBar';
 import { Plate } from '../components/ui/Plate';
 import { RTable } from '../components/ui/RTable';
+import { MIN_TAP_TARGET } from '../theme/spacing';
 
 const TODAY = format(new Date(), 'yyyy-MM-dd');
 
@@ -34,6 +37,15 @@ export default function WorkforceReport() {
   const tablet = isTablet(bp);
 
   const [date, setDate] = useState(TODAY);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const { isSupervisorOrAdmin } = useMyRole();
+  const generateLedger = useGenerateDutyLedger();
+
+  useEffect(() => {
+    if (!successMsg) return;
+    const timer = setTimeout(() => setSuccessMsg(null), 3500);
+    return () => clearTimeout(timer);
+  }, [successMsg]);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['workforce', date],
@@ -45,10 +57,11 @@ export default function WorkforceReport() {
   const totalOnDuty = report.reduce((sum, r) => sum + r.on_duty_count, 0);
   const shortages = report.filter((r) => r.shortage_flag);
   const districts = Array.from(new Set(report.map((r) => r.district).filter((d): d is number => d != null)));
+  const showGenerateButton = !isLoading && !error && totalOnDuty === 0 && report.length > 0 && isSupervisorOrAdmin;
 
   return (
     <div>
-      <div style={{ marginBottom: 16 }}>
+      <div style={{ marginBottom: 16, display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
         <input
           type="date"
           value={date}
@@ -56,6 +69,44 @@ export default function WorkforceReport() {
           style={{ padding: '8px 10px', borderRadius: 6, border: `1px solid ${t.border}`, background: t.surfaceAlt, color: t.text }}
         />
       </div>
+
+      {showGenerateButton && (
+        <AlertBar t={t} type="warn">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+            <span>On-duty count is 0 for {date} — the duty ledger may not have been generated yet for this date.</span>
+            <button
+              type="button"
+              onClick={() => generateLedger.mutate(date, { onSuccess: () => setSuccessMsg(`Duty ledger generated for ${date}.`) })}
+              disabled={generateLedger.isPending}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '6px 12px',
+                minHeight: MIN_TAP_TARGET,
+                borderRadius: 6,
+                border: 'none',
+                background: t.pA,
+                color: '#fff',
+                fontWeight: 600,
+                fontSize: 12,
+                cursor: generateLedger.isPending ? 'default' : 'pointer',
+                opacity: generateLedger.isPending ? 0.7 : 1,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {generateLedger.isPending && <InlineSpinner size={11} />}
+              {generateLedger.isPending ? 'Generating…' : 'Generate Duty Ledger'}
+            </button>
+          </div>
+        </AlertBar>
+      )}
+      {successMsg && <AlertBar t={t} type="ok">{successMsg}</AlertBar>}
+      {generateLedger.isError && (
+        <AlertBar t={t} type="crit">
+          {(generateLedger.error as { error?: { message?: string } })?.error?.message ?? 'Failed to generate duty ledger.'}
+        </AlertBar>
+      )}
 
       <div
         style={{

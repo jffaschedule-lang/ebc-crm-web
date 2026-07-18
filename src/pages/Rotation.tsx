@@ -6,6 +6,7 @@ import { useBreakpoint, isMobile } from '../hooks/useBreakpoint';
 import { MIN_TAP_TARGET } from '../theme/spacing';
 import { useRotation, useRotationPeriod } from '../hooks/useRotation';
 import { AlertBar } from '../components/ui/AlertBar';
+import { DismissibleInfoBar } from '../components/ui/DismissibleInfoBar';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { RotationStrip } from '../components/ui/RotationStrip';
 import { Card } from '../components/ui/Card';
@@ -26,9 +27,9 @@ export default function Rotation() {
 
   return (
     <div>
-      <AlertBar t={t} type="warn">
-        All rotation answers come from the backend rotationService — never computed client-side.
-      </AlertBar>
+      <DismissibleInfoBar t={t} storageKey="ebc-legacy-notice-dismissed">
+        EBC Workforce CRM — Production system. Duty board data updates automatically every 30 seconds.
+      </DismissibleInfoBar>
 
       <div style={{ marginBottom: 16 }}>
         <input

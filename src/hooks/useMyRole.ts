@@ -18,7 +18,8 @@ export function useMyRole() {
   });
 
   const roles = data?.roles ?? [];
-  const isSupervisorOrAdmin = roles.includes('supervisor') || roles.includes('admin');
+  const isAdmin = roles.includes('admin');
+  const isSupervisorOrAdmin = roles.includes('supervisor') || isAdmin;
 
-  return { roles, isSupervisorOrAdmin, isLoading };
+  return { roles, isAdmin, isSupervisorOrAdmin, isLoading };
 }
