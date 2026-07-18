@@ -15,6 +15,7 @@ import { PlatoonChip } from '../components/ui/PlatoonChip';
 import { Plate } from '../components/ui/Plate';
 import { StatusChip } from '../components/ui/StatusChip';
 import { Card } from '../components/ui/Card';
+import { MIN_TAP_TARGET } from '../theme/spacing';
 
 const TODAY = format(new Date(), 'yyyy-MM-dd');
 
@@ -89,7 +90,7 @@ export default function DutyLedger() {
     { key: 'station', header: 'Station', render: (r) => r.station, hideAt: ['md'] },
     { key: 'platoon', header: 'Platoon', render: (r) => <PlatoonChip t={t} platoon={r.platoon} /> },
     { key: 'status', header: 'Status', render: (r) => <StatusChip t={t} status={r.duty_status} /> },
-    { key: 'hours', header: 'Hours', render: (r) => parseFloat(r.hours_worked).toFixed(2), hideAt: ['md', 'lg'] },
+    { key: 'hours', header: 'Hours', render: (r) => parseFloat(r.hours_worked).toFixed(2), hideAt: ['md', 'lg'], numeric: true },
     { key: 'acting', header: 'Acting Note', render: (r) => r.acting_note ?? '—' },
     { key: 'train', header: 'Training', render: trainToggle },
   ];
@@ -101,12 +102,27 @@ export default function DutyLedger() {
           type="date"
           value={date}
           onChange={(e) => setDate(e.target.value)}
-          style={{ padding: '8px 10px', borderRadius: 6, border: `1px solid ${t.border}`, background: t.surfaceAlt, color: t.text }}
+          style={{
+            padding: '8px 10px',
+            minHeight: mobile ? MIN_TAP_TARGET : undefined,
+            borderRadius: 6,
+            border: `1px solid ${t.border}`,
+            background: t.surfaceAlt,
+            color: t.text,
+            flex: mobile ? 1 : undefined,
+          }}
         />
         <select
           value={platoonFilter}
           onChange={(e) => setPlatoonFilter(e.target.value)}
-          style={{ padding: '8px 10px', borderRadius: 6, border: `1px solid ${t.border}`, background: t.surfaceAlt, color: t.text }}
+          style={{
+            padding: '8px 10px',
+            minHeight: mobile ? MIN_TAP_TARGET : undefined,
+            borderRadius: 6,
+            border: `1px solid ${t.border}`,
+            background: t.surfaceAlt,
+            color: t.text,
+          }}
         >
           <option value="">All platoons</option>
           <option value="A">A</option>
@@ -118,7 +134,7 @@ export default function DutyLedger() {
       {trainError && <AlertBar t={t} type="crit">{trainError}</AlertBar>}
 
       {isLoading && <LoadingSpinner t={t} size={32} />}
-      {error && <AlertBar t={t} type="crit">Failed to load duty ledger for {date}.</AlertBar>}
+      {error && <AlertBar t={t} type="crit">Couldn't load the duty ledger for {date}. Check your connection and reload.</AlertBar>}
 
       {!isLoading && !error && (
         mobile ? (
@@ -126,6 +142,7 @@ export default function DutyLedger() {
             t={t}
             rows={rows}
             rowKey={(r) => r.id}
+            emptyMessage={`No duty ledger entries for ${date} yet.`}
             renderItem={(r) => (
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <Plate t={t} code={r.company_code} />
@@ -139,7 +156,14 @@ export default function DutyLedger() {
             )}
           />
         ) : (
-          <RTable t={t} bp={bp} cols={cols} rows={rows} rowKey={(r) => r.id} />
+          <RTable
+            t={t}
+            bp={bp}
+            cols={cols}
+            rows={rows}
+            rowKey={(r) => r.id}
+            emptyMessage={`No duty ledger entries for ${date} yet.`}
+          />
         )
       )}
 
@@ -150,6 +174,8 @@ export default function DutyLedger() {
 
 function DetAssignmentCard({ t, date }: { t: ReturnType<typeof tokensFor>; date: string }) {
   const queryClient = useQueryClient();
+  const bp = useBreakpoint();
+  const mobile = isMobile(bp);
 
   const [employeeId, setEmployeeId] = useState('');
   const [location, setLocation] = useState('');
@@ -197,17 +223,19 @@ function DetAssignmentCard({ t, date }: { t: ReturnType<typeof tokensFor>; date:
     return e ? `${e.last_name}, ${e.first_name}` : id;
   };
 
-  const inputStyle = {
+  const inputStyle: React.CSSProperties = {
     padding: '8px 10px',
     borderRadius: 6,
     border: `1px solid ${t.border}`,
     background: t.surfaceAlt,
     color: t.text,
-  } as const;
+    minHeight: mobile ? MIN_TAP_TARGET : undefined,
+    width: mobile ? '100%' : undefined,
+  };
 
   return (
     <Card t={t} style={{ marginTop: 20 }}>
-      <h3 style={{ fontSize: 13, color: t.text, marginTop: 0, marginBottom: 4 }}>Detail Assignment (DET)</h3>
+      <h3 style={{ fontSize: 14, fontWeight: 650, color: t.text, marginTop: 0, marginBottom: 4 }}>Detail Assignment (DET)</h3>
       <p style={{ fontSize: 12, color: t.textMuted, marginTop: 0, marginBottom: 10 }}>
         Sequential assignments are allowed (e.g. 07:00–14:00 then 14:00–07:00). Overlapping times, or a
         detail during approved leave, will be rejected.
@@ -218,8 +246,8 @@ function DetAssignmentCard({ t, date }: { t: ReturnType<typeof tokensFor>; date:
         <div style={{ fontSize: 12, color: t.ok, marginBottom: 10 }}>{detOk}</div>
       )}
 
-      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 12 }}>
-        <select value={employeeId} onChange={(e) => setEmployeeId(e.target.value)} style={{ ...inputStyle, minWidth: 200 }}>
+      <div style={{ display: 'flex', flexDirection: mobile ? 'column' : 'row', gap: 10, flexWrap: 'wrap', marginBottom: 12 }}>
+        <select value={employeeId} onChange={(e) => setEmployeeId(e.target.value)} style={{ ...inputStyle, minWidth: mobile ? undefined : 200 }}>
           <option value="">Select employee…</option>
           {sortedEmployees.map((e) => (
             <option key={e.id} value={e.id}>
@@ -232,17 +260,20 @@ function DetAssignmentCard({ t, date }: { t: ReturnType<typeof tokensFor>; date:
           placeholder="Detail location (e.g. E148 / Station 14)"
           value={location}
           onChange={(e) => setLocation(e.target.value)}
-          style={{ ...inputStyle, flex: 1, minWidth: 200 }}
+          style={{ ...inputStyle, flex: mobile ? undefined : 1, minWidth: mobile ? undefined : 200 }}
         />
-        <input type="time" value={spanStart} onChange={(e) => setSpanStart(e.target.value)} style={inputStyle} />
-        <input type="time" value={spanEnd} onChange={(e) => setSpanEnd(e.target.value)} style={inputStyle} />
+        <div style={{ display: 'flex', gap: 10 }}>
+          <input type="time" value={spanStart} onChange={(e) => setSpanStart(e.target.value)} style={{ ...inputStyle, flex: mobile ? 1 : undefined }} />
+          <input type="time" value={spanEnd} onChange={(e) => setSpanEnd(e.target.value)} style={{ ...inputStyle, flex: mobile ? 1 : undefined }} />
+        </div>
         <button
           onClick={() => createDet.mutate()}
           disabled={createDet.isPending || !employeeId || !location}
           style={{
             padding: '8px 16px',
+            minHeight: mobile ? MIN_TAP_TARGET : undefined,
             borderRadius: 6,
-            fontSize: 12,
+            fontSize: 13,
             fontWeight: 600,
             cursor: 'pointer',
             border: `1px solid ${t.pB}`,
@@ -255,28 +286,19 @@ function DetAssignmentCard({ t, date }: { t: ReturnType<typeof tokensFor>; date:
         </button>
       </div>
 
-      {(detRecords ?? []).length > 0 && (
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
-          <thead>
-            <tr style={{ background: t.surfaceAlt }}>
-              <th style={{ textAlign: 'left', padding: 6, fontSize: 10, color: t.textMuted }}>Employee</th>
-              <th style={{ textAlign: 'left', padding: 6, fontSize: 10, color: t.textMuted }}>Location</th>
-              <th style={{ textAlign: 'left', padding: 6, fontSize: 10, color: t.textMuted }}>Span</th>
-              <th style={{ textAlign: 'left', padding: 6, fontSize: 10, color: t.textMuted }}>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {(detRecords ?? []).map((d) => (
-              <tr key={d.id} style={{ borderTop: `1px solid ${t.border}` }}>
-                <td style={{ padding: 6, color: t.text }}>{nameFor(d.employee_id)}</td>
-                <td style={{ padding: 6, color: t.text }}>{d.detail_location}</td>
-                <td style={{ padding: 6, color: t.text }}>{d.span_start}–{d.span_end}</td>
-                <td style={{ padding: 6 }}><StatusChip t={t} status={d.status} /></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+      <RTable
+        t={t}
+        bp={bp}
+        rowKey={(d) => d.id}
+        rows={detRecords ?? []}
+        emptyMessage={`No detail assignments for ${date} yet.`}
+        cols={[
+          { key: 'employee', header: 'Employee', render: (d) => nameFor(d.employee_id) },
+          { key: 'location', header: 'Location', render: (d) => d.detail_location },
+          { key: 'span', header: 'Span', render: (d) => `${d.span_start}–${d.span_end}`, numeric: true },
+          { key: 'status', header: 'Status', render: (d) => <StatusChip t={t} status={d.status} /> },
+        ]}
+      />
     </Card>
   );
 }

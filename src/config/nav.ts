@@ -1,29 +1,44 @@
+import {
+  ShieldIcon,
+  UsersIcon,
+  RefreshIcon,
+  ClipboardIcon,
+  PlusIcon,
+  CalendarIcon,
+  ClockIcon,
+  DollarIcon,
+  ChartIcon,
+  AlarmIcon,
+  LockIcon,
+  SearchIcon,
+  GearIcon,
+} from '../components/ui/Icon';
+
 export interface NavItem {
   label: string;
   path: string;
-  icon: string;
+  icon: React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
 }
 
 export const NAV_ITEMS: NavItem[] = [
-  { label: 'Duty Board', path: '/', icon: '🛡' },
-  { label: 'Roster', path: '/roster', icon: '👥' },
-  { label: 'Rotation', path: '/rotation', icon: '🔄' },
-  { label: 'Duty Ledger', path: '/duty-ledger', icon: '📋' },
-  { label: 'New Leave Request', path: '/leave/new', icon: '➕' },
-  { label: 'Leave Records', path: '/leave', icon: '🗓' },
-  { label: 'Timesheet', path: '/timesheet', icon: '⏱' },
-  { label: 'Payroll', path: '/payroll', icon: '💵' },
-  { label: 'Workforce Report', path: '/workforce', icon: '📊' },
-  { label: 'Overtime', path: '/overtime', icon: '⏰' },
-  { label: 'Shift Close', path: '/shift-close', icon: '🔒' },
-  { label: 'Audit', path: '/audit', icon: '🕵' },
-  { label: 'Settings', path: '/settings', icon: '⚙' },
+  { label: 'Duty Board', path: '/', icon: ShieldIcon },
+  { label: 'Roster', path: '/roster', icon: UsersIcon },
+  { label: 'Rotation', path: '/rotation', icon: RefreshIcon },
+  { label: 'Duty Ledger', path: '/duty-ledger', icon: ClipboardIcon },
+  { label: 'New Leave Request', path: '/leave/new', icon: PlusIcon },
+  { label: 'Leave Records', path: '/leave', icon: CalendarIcon },
+  { label: 'Timesheet', path: '/timesheet', icon: ClockIcon },
+  { label: 'Payroll', path: '/payroll', icon: DollarIcon },
+  { label: 'Workforce Report', path: '/workforce', icon: ChartIcon },
+  { label: 'Overtime', path: '/overtime', icon: AlarmIcon },
+  { label: 'Shift Close', path: '/shift-close', icon: LockIcon },
+  { label: 'Audit', path: '/audit', icon: SearchIcon },
+  { label: 'Settings', path: '/settings', icon: GearIcon },
 ];
 
 export const BOTTOM_NAV_ITEMS: NavItem[] = [
-  { label: 'Duty Board', path: '/', icon: '🛡' },
-  { label: 'Roster', path: '/roster', icon: '👥' },
-  { label: 'Leave', path: '/leave', icon: '🗓' },
-  { label: 'Payroll', path: '/payroll', icon: '💵' },
-  { label: 'Audit', path: '/audit', icon: '🕵' },
+  { label: 'Duty Board', path: '/', icon: ShieldIcon },
+  { label: 'Roster', path: '/roster', icon: UsersIcon },
+  { label: 'Leave', path: '/leave', icon: CalendarIcon },
+  { label: 'Payroll', path: '/payroll', icon: DollarIcon },
 ];

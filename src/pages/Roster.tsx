@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAppStore } from '../store/useAppStore';
 import { tokensFor } from '../theme/tokens';
-import { useBreakpoint, isMobile } from '../hooks/useBreakpoint';
+import { useBreakpoint, isMobile, isTablet } from '../hooks/useBreakpoint';
 import { apiGet } from '../api/client';
 import { Employee, RANK_SENIORITY } from '../types/domain';
 import { MetricCard } from '../components/ui/MetricCard';
@@ -20,6 +20,7 @@ export default function Roster() {
   const t = tokensFor(theme);
   const bp = useBreakpoint();
   const mobile = isMobile(bp);
+  const tablet = isTablet(bp);
 
   const [search, setSearch] = useState('');
   const [platoonFilter, setPlatoonFilter] = useState('');
@@ -37,20 +38,25 @@ export default function Roster() {
   });
 
   if (isLoading) return <LoadingSpinner t={t} size={32} />;
-  if (error) return <AlertBar t={t} type="crit">Failed to load roster.</AlertBar>;
+  if (error) return <AlertBar t={t} type="crit">Couldn't load the roster. Check your connection and reload.</AlertBar>;
 
   const employees = data ?? [];
   const active = employees.filter((e) => e.status === 'Active');
   const supervisors = employees.filter((e) => e.supervisor);
   const byPlatoon = (p: string) => employees.filter((e) => e.platoon === p).length;
+  const hasFilters = Boolean(search || platoonFilter || rankFilter);
 
   const cols: RTableColumn<Employee>[] = [
     { key: 'name', header: 'Name', render: (e) => `${e.last_name}, ${e.first_name}` },
-    { key: 'emp_number', header: '#', render: (e) => e.emp_number, hideAt: ['md'] },
+    { key: 'emp_number', header: '#', render: (e) => e.emp_number, hideAt: ['md'], numeric: true },
     { key: 'rank', header: 'Rank', render: (e) => e.rank },
     { key: 'platoon', header: 'Platoon', render: (e) => <PlatoonChip t={t} platoon={e.platoon} /> },
     { key: 'company', header: 'Company', render: (e) => <Plate t={t} code={e.company_code} />, hideAt: ['md', 'lg'] },
-    { key: 'status', header: 'Status', render: (e) => e.status },
+    {
+      key: 'status',
+      header: 'Status',
+      render: (e) => <span style={{ color: e.status === 'Active' ? t.ok : t.textFaint }}>{e.status}</span>,
+    },
   ];
 
   return (
@@ -58,7 +64,7 @@ export default function Roster() {
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: mobile ? '1fr 1fr' : 'repeat(4, 1fr)',
+          gridTemplateColumns: mobile ? '1fr 1fr' : tablet ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)',
           gap: 12,
           marginBottom: 20,
         }}
@@ -124,8 +130,9 @@ export default function Roster() {
           t={t}
           rows={employees}
           rowKey={(e) => e.id}
+          emptyMessage={hasFilters ? 'No employees match these filters.' : 'No employees on the roster yet.'}
           renderItem={(e) => (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, minHeight: 44 }}>
               <Avatar t={t} name={`${e.first_name} ${e.last_name}`} />
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 13, color: t.text }}>{e.last_name}, {e.first_name}</div>
@@ -136,12 +143,19 @@ export default function Roster() {
           )}
         />
       ) : (
-        <RTable t={t} bp={bp} cols={cols} rows={employees} rowKey={(e) => e.id} />
+        <RTable
+          t={t}
+          bp={bp}
+          cols={cols}
+          rows={employees}
+          rowKey={(e) => e.id}
+          emptyMessage={hasFilters ? 'No employees match these filters.' : 'No employees on the roster yet.'}
+        />
       )}
 
       {!mobile && (
         <Card t={t} style={{ marginTop: 20 }}>
-          <h3 style={{ fontSize: 13, color: t.text, marginTop: 0 }}>Company → Station Map</h3>
+          <h3 style={{ fontSize: 14, fontWeight: 650, color: t.text, marginTop: 0 }}>Company → Station Map</h3>
           <p style={{ fontSize: 12, color: t.textMuted }}>
             See the Workforce Report page for the live company-to-station roster and shortage flags.
           </p>

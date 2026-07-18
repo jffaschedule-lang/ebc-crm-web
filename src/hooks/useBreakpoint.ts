@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
+import { BP_DESKTOP_MIN, BP_TABLET_MIN } from '../theme/breakpoints';
 
 export type Breakpoint = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
 
 function computeBreakpoint(width: number): Breakpoint {
   if (width < 375) return 'xs';
   if (width < 640) return 'sm';
-  if (width < 768) return 'md';
-  if (width < 1024) return 'lg';
+  if (width < BP_TABLET_MIN) return 'md';
+  if (width < BP_DESKTOP_MIN) return 'lg';
   if (width < 1280) return 'xl';
   return '2xl';
 }

@@ -3,7 +3,7 @@ import { format } from 'date-fns';
 import { useQuery } from '@tanstack/react-query';
 import { useAppStore } from '../store/useAppStore';
 import { tokensFor } from '../theme/tokens';
-import { useBreakpoint, isMobile } from '../hooks/useBreakpoint';
+import { useBreakpoint, isMobile, isTablet } from '../hooks/useBreakpoint';
 import { apiGet } from '../api/client';
 import { MetricCard } from '../components/ui/MetricCard';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
@@ -11,6 +11,7 @@ import { AlertBar } from '../components/ui/AlertBar';
 import { Card } from '../components/ui/Card';
 import { ProgressBar } from '../components/ui/ProgressBar';
 import { Plate } from '../components/ui/Plate';
+import { RTable } from '../components/ui/RTable';
 
 const TODAY = format(new Date(), 'yyyy-MM-dd');
 
@@ -30,6 +31,7 @@ export default function WorkforceReport() {
   const t = tokensFor(theme);
   const bp = useBreakpoint();
   const mobile = isMobile(bp);
+  const tablet = isTablet(bp);
 
   const [date, setDate] = useState(TODAY);
 
@@ -55,7 +57,14 @@ export default function WorkforceReport() {
         />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: mobile ? '1fr' : 'repeat(4, 1fr)', gap: 12, marginBottom: 20 }}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: mobile ? '1fr 1fr' : tablet ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)',
+          gap: 12,
+          marginBottom: 20,
+        }}
+      >
         <MetricCard t={t} label="Companies" value={report.length} />
         <MetricCard t={t} label="Required Seats" value={totalRequired} />
         <MetricCard t={t} label="On Duty" value={totalOnDuty} />
@@ -63,7 +72,7 @@ export default function WorkforceReport() {
       </div>
 
       {isLoading && <LoadingSpinner t={t} size={32} />}
-      {error && <AlertBar t={t} type="crit">Failed to load workforce report.</AlertBar>}
+      {error && <AlertBar t={t} type="crit">Couldn't load the workforce report. Check your connection and reload.</AlertBar>}
 
       {shortages.length > 0 && (
         <AlertBar t={t} type="crit">
@@ -73,8 +82,12 @@ export default function WorkforceReport() {
         </AlertBar>
       )}
 
-      {!isLoading && !error && (
-        <div style={{ display: 'grid', gridTemplateColumns: mobile ? '1fr' : 'repeat(3, 1fr)', gap: 12, marginBottom: 20 }}>
+      {!isLoading && !error && report.length === 0 && (
+        <p style={{ color: t.textFaint, fontSize: 13, marginBottom: 20 }}>No companies configured yet.</p>
+      )}
+
+      {!isLoading && !error && report.length > 0 && (
+        <div style={{ display: 'grid', gridTemplateColumns: mobile ? '1fr' : tablet ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)', gap: 12, marginBottom: 20 }}>
           {report.map((r) => (
             <Card key={r.company_code} t={t}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
@@ -95,28 +108,28 @@ export default function WorkforceReport() {
 
       {districts.length > 0 && (
         <Card t={t}>
-          <h3 style={{ fontSize: 13, color: t.text, marginTop: 0, marginBottom: 10 }}>District Rollup</h3>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-            <thead>
-              <tr style={{ background: t.surfaceAlt }}>
-                <th style={{ textAlign: 'left', padding: 8, fontSize: 10, color: t.textMuted }}>District</th>
-                <th style={{ textAlign: 'left', padding: 8, fontSize: 10, color: t.textMuted }}>Required</th>
-                <th style={{ textAlign: 'left', padding: 8, fontSize: 10, color: t.textMuted }}>On Duty</th>
-              </tr>
-            </thead>
-            <tbody>
-              {districts.map((d) => {
-                const inDistrict = report.filter((r) => r.district === d);
-                return (
-                  <tr key={d} style={{ borderTop: `1px solid ${t.border}` }}>
-                    <td style={{ padding: 8, color: t.text }}>{d}</td>
-                    <td style={{ padding: 8, color: t.text }}>{inDistrict.reduce((s, r) => s + r.required_seats, 0)}</td>
-                    <td style={{ padding: 8, color: t.text }}>{inDistrict.reduce((s, r) => s + r.on_duty_count, 0)}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+          <h3 style={{ fontSize: 14, fontWeight: 650, color: t.text, marginTop: 0, marginBottom: 10 }}>District Rollup</h3>
+          <RTable
+            t={t}
+            bp={bp}
+            rowKey={(d) => String(d)}
+            rows={districts}
+            cols={[
+              { key: 'district', header: 'District', render: (d) => d },
+              {
+                key: 'required',
+                header: 'Required',
+                numeric: true,
+                render: (d) => report.filter((r) => r.district === d).reduce((s, r) => s + r.required_seats, 0),
+              },
+              {
+                key: 'onDuty',
+                header: 'On Duty',
+                numeric: true,
+                render: (d) => report.filter((r) => r.district === d).reduce((s, r) => s + r.on_duty_count, 0),
+              },
+            ]}
+          />
         </Card>
       )}
     </div>

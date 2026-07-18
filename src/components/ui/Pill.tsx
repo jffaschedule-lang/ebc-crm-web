@@ -1,18 +1,23 @@
 import { ReactNode } from 'react';
 import { ThemeTokens } from '../../theme/tokens';
 
+export type PillColor = 'ok' | 'warn' | 'crit' | 'info' | 'det' | 'mwa' | 'ot';
+
 interface PillProps {
   t: ThemeTokens;
-  color: 'green' | 'amber' | 'red' | 'blue';
+  color: PillColor;
   children: ReactNode;
 }
 
 export function Pill({ t, color, children }: PillProps) {
-  const map: Record<PillProps['color'], { fg: string; bg: string }> = {
-    green: { fg: t.ok, bg: t.okBg },
-    amber: { fg: t.warn, bg: t.warnBg },
-    red: { fg: t.crit, bg: t.critBg },
-    blue: { fg: t.info, bg: t.infoBg },
+  const map: Record<PillColor, { fg: string; bg: string }> = {
+    ok: { fg: t.ok, bg: t.okBg },
+    warn: { fg: t.warn, bg: t.warnBg },
+    crit: { fg: t.crit, bg: t.critBg },
+    info: { fg: t.info, bg: t.infoBg },
+    det: { fg: t.det, bg: t.detBg },
+    mwa: { fg: t.mwa, bg: t.mwaBg },
+    ot: { fg: t.ot, bg: t.otBg },
   };
   const { fg, bg } = map[color];
 

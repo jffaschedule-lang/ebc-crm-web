@@ -5,19 +5,21 @@ import { usePendingLeaveCount } from '../../hooks/usePendingLeaveCount';
 import { tokensFor } from '../../theme/tokens';
 import { NAV_ITEMS } from '../../config/nav';
 import { useAuth } from '../../auth/useAuth';
+import { PaletteIcon, LogOutIcon } from '../ui/Icon';
+import { MIN_TAP_TARGET } from '../../theme/spacing';
 
 const WIDTH_BY_BP: Record<string, number> = {
-  xs: 240,
-  sm: 240,
-  md: 200,
-  lg: 210,
-  xl: 220,
-  '2xl': 240,
+  xs: 260,
+  sm: 260,
+  md: 208,
+  lg: 220,
+  xl: 226,
+  '2xl': 248,
 };
 
 export function Sidebar() {
   const theme = useAppStore((s) => s.theme);
-  const toggleTheme = useAppStore((s) => s.toggleTheme);
+  const cycleTheme = useAppStore((s) => s.cycleTheme);
   const drawerOpen = useAppStore((s) => s.drawerOpen);
   const setDrawerOpen = useAppStore((s) => s.setDrawerOpen);
   const bp = useBreakpoint();
@@ -46,12 +48,11 @@ export function Sidebar() {
         transition: 'transform 0.2s ease',
       }}
     >
-      <div style={{ height: 4, background: `linear-gradient(90deg, ${t.pA}, ${t.warn})` }} />
+      <div style={{ height: 4, background: `linear-gradient(90deg, ${t.pA}, ${t.train})` }} />
 
       <div style={{ padding: '16px 14px', borderBottom: `1px solid ${t.sidebarActiveBg}` }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 20 }}>🚒</span>
-          <strong style={{ fontSize: 14, color: '#fff' }}>EBC Workforce CRM</strong>
+          <strong style={{ fontSize: 14, color: '#fff', letterSpacing: 0.2 }}>EBC Workforce CRM</strong>
         </div>
         <div style={{ fontSize: 10, color: t.textFaint, marginTop: 4, letterSpacing: 0.5 }}>
           PROTOTYPE · DUMMY DATA
@@ -59,44 +60,50 @@ export function Sidebar() {
       </div>
 
       <nav style={{ flex: 1, overflowY: 'auto', padding: '8px 0' }}>
-        {NAV_ITEMS.map((item) => (
-          <NavLink
-            key={item.path}
-            to={item.path}
-            end={item.path === '/'}
-            onClick={() => mobile && setDrawerOpen(false)}
-            style={({ isActive }) => ({
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: 10,
-              padding: '9px 16px',
-              fontSize: 13,
-              textDecoration: 'none',
-              color: isActive ? '#fff' : t.sidebarText,
-              background: isActive ? t.sidebarActiveBg : 'transparent',
-              borderLeft: `3px solid ${isActive ? t.pA : 'transparent'}`,
-            })}
-          >
-            <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span aria-hidden>{item.icon}</span>
-              <span>{item.label}</span>
-            </span>
-            {item.path === '/leave' && pendingCount > 0 && (
-              <span
-                style={{
-                  background: t.pA,
-                  color: '#fff',
-                  borderRadius: 999,
-                  fontSize: 10,
-                  padding: '1px 6px',
-                }}
-              >
-                {pendingCount}
+        {NAV_ITEMS.map((item) => {
+          const ItemIcon = item.icon;
+          return (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              end={item.path === '/'}
+              onClick={() => mobile && setDrawerOpen(false)}
+              style={({ isActive }) => ({
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 10,
+                padding: mobile ? '12px 16px' : '9px 16px',
+                minHeight: mobile ? MIN_TAP_TARGET : undefined,
+                fontSize: 13,
+                textDecoration: 'none',
+                color: isActive ? '#fff' : t.sidebarText,
+                background: isActive ? t.sidebarActiveBg : 'transparent',
+                borderLeft: `3px solid ${isActive ? t.pA : 'transparent'}`,
+              })}
+            >
+              <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <ItemIcon size={17} style={{ flexShrink: 0 }} />
+                <span>{item.label}</span>
               </span>
-            )}
-          </NavLink>
-        ))}
+              {item.path === '/leave' && pendingCount > 0 && (
+                <span
+                  style={{
+                    background: t.pA,
+                    color: '#fff',
+                    borderRadius: 999,
+                    fontSize: 10,
+                    fontWeight: 600,
+                    padding: '1px 6px',
+                    fontFamily: 'ui-monospace, SF Mono, Consolas, monospace',
+                  }}
+                >
+                  {pendingCount}
+                </span>
+              )}
+            </NavLink>
+          );
+        })}
       </nav>
 
       <div style={{ padding: 14, borderTop: `1px solid ${t.sidebarActiveBg}` }}>
@@ -113,6 +120,7 @@ export function Sidebar() {
               color: '#fff',
               fontSize: 12,
               fontWeight: 600,
+              flexShrink: 0,
             }}
           >
             {(user?.email ?? '?').slice(0, 1).toUpperCase()}
@@ -126,9 +134,15 @@ export function Sidebar() {
         <div style={{ display: 'flex', gap: 8 }}>
           <button
             type="button"
-            onClick={toggleTheme}
+            onClick={cycleTheme}
+            aria-label="Cycle theme"
             style={{
               flex: 1,
+              minHeight: mobile ? MIN_TAP_TARGET : 32,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 6,
               padding: '6px 8px',
               borderRadius: 6,
               border: `1px solid ${t.sidebarActiveBg}`,
@@ -138,13 +152,20 @@ export function Sidebar() {
               cursor: 'pointer',
             }}
           >
-            {theme === 'dark' ? '☀ Light' : '🌙 Dark'}
+            <PaletteIcon size={15} />
+            Theme
           </button>
           <button
             type="button"
             onClick={() => signOut()}
+            aria-label="Sign out"
             style={{
               flex: 1,
+              minHeight: mobile ? MIN_TAP_TARGET : 32,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 6,
               padding: '6px 8px',
               borderRadius: 6,
               border: `1px solid ${t.sidebarActiveBg}`,
@@ -154,6 +175,7 @@ export function Sidebar() {
               cursor: 'pointer',
             }}
           >
+            <LogOutIcon size={15} />
             Sign out
           </button>
         </div>

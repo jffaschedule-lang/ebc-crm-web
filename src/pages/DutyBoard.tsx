@@ -2,7 +2,7 @@ import { format } from 'date-fns';
 import { useQuery } from '@tanstack/react-query';
 import { useAppStore } from '../store/useAppStore';
 import { tokensFor } from '../theme/tokens';
-import { useBreakpoint, isMobile } from '../hooks/useBreakpoint';
+import { useBreakpoint, isMobile, isTablet } from '../hooks/useBreakpoint';
 import { useRealtime } from '../hooks/useRealtime';
 import { useRotation, useRotationPeriod } from '../hooks/useRotation';
 import { apiGet } from '../api/client';
@@ -41,6 +41,7 @@ export default function DutyBoard() {
   const onLeave = rows.filter((r) => r.duty_status !== 'O' && r.duty_status !== 'Train').length;
   const needsAction = rows.filter((r) => r.acting_note);
   const mobile = isMobile(bp);
+  const tablet = isTablet(bp);
 
   return (
     <div>
@@ -57,7 +58,7 @@ export default function DutyBoard() {
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: mobile ? '1fr' : 'repeat(4, 1fr)',
+          gridTemplateColumns: mobile ? '1fr 1fr' : tablet ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)',
           gap: 12,
           marginBottom: 20,
         }}
@@ -70,14 +71,16 @@ export default function DutyBoard() {
 
       {periodDays && periodDays.length > 0 && (
         <Card t={t} style={{ marginBottom: 20 }}>
-          <h3 style={{ fontSize: 13, color: t.text, marginTop: 0, marginBottom: 10 }}>Pay Period Rotation</h3>
+          <h3 style={{ fontSize: 14, fontWeight: 650, color: t.text, marginTop: 0, marginBottom: 10 }}>Pay Period Rotation</h3>
           <RotationStrip t={t} days={periodDays} todayIso={TODAY} />
         </Card>
       )}
 
       <Card t={t}>
-        <h3 style={{ fontSize: 13, color: t.text, marginTop: 0, marginBottom: 10 }}>Needs Action</h3>
-        {needsAction.length === 0 && <p style={{ color: t.textFaint, fontSize: 13 }}>Nothing needs attention.</p>}
+        <h3 style={{ fontSize: 14, fontWeight: 650, color: t.text, marginTop: 0, marginBottom: 10 }}>Needs Action</h3>
+        {needsAction.length === 0 && (
+          <p style={{ color: t.textFaint, fontSize: 13 }}>No acting assignments need attention right now.</p>
+        )}
         {needsAction.map((row) => (
           <div
             key={row.id}

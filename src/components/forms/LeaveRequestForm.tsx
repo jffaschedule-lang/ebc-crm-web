@@ -3,12 +3,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useQuery } from '@tanstack/react-query';
 import { ThemeTokens } from '../../theme/tokens';
-import { Breakpoint } from '../../hooks/useBreakpoint';
+import { Breakpoint, isMobile } from '../../hooks/useBreakpoint';
 import { apiGet } from '../../api/client';
 import { Employee } from '../../types/domain';
 import { useLeaveSlots, useSubmitLeave } from '../../hooks/useLeaveSlots';
 import { SlotBar } from '../ui/SlotBar';
 import { StatusChip } from '../ui/StatusChip';
+import { MIN_TAP_TARGET } from '../../theme/spacing';
 
 const LEAVE_TYPES = ['AL', 'EAL', 'SL', 'ISSL', 'FODI', 'ADM', 'AWOL', 'FL', 'CT', 'CL', 'DET', 'MWA'] as const;
 
@@ -33,7 +34,8 @@ interface LeaveRequestFormProps {
   bp: Breakpoint;
 }
 
-export function LeaveRequestForm({ t }: LeaveRequestFormProps) {
+export function LeaveRequestForm({ t, bp }: LeaveRequestFormProps) {
+  const mobile = isMobile(bp);
   const { data: employees } = useQuery({
     queryKey: ['employees', 'all'],
     queryFn: () => apiGet<Employee[]>('/api/employees', { limit: 200 }),
@@ -68,6 +70,7 @@ export function LeaveRequestForm({ t }: LeaveRequestFormProps) {
   const inputStyle: React.CSSProperties = {
     width: '100%',
     padding: '8px 10px',
+    minHeight: mobile ? MIN_TAP_TARGET : undefined,
     borderRadius: 6,
     border: `1px solid ${t.border}`,
     background: t.surfaceAlt,
@@ -108,7 +111,7 @@ export function LeaveRequestForm({ t }: LeaveRequestFormProps) {
         {errors.shift_date && <p style={{ color: t.crit, fontSize: 12 }}>{errors.shift_date.message}</p>}
       </div>
 
-      <div style={{ display: 'flex', gap: 10 }}>
+      <div style={{ display: 'flex', flexDirection: mobile ? 'column' : 'row', gap: mobile ? 14 : 10 }}>
         <div style={{ flex: 1 }}>
           <label style={labelStyle}>Span Start</label>
           <input type="time" {...register('span_start')} style={inputStyle} />
@@ -120,10 +123,10 @@ export function LeaveRequestForm({ t }: LeaveRequestFormProps) {
       </div>
 
       {leaveType === 'SL' && (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, fontSize: 12, color: t.text }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, fontSize: 13, color: t.text }}>
           {(['sl_illness', 'sl_medical', 'sl_dental', 'sl_optical', 'sl_death'] as const).map((field) => (
-            <label key={field} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              <input type="checkbox" {...register(field)} />
+            <label key={field} style={{ display: 'flex', alignItems: 'center', gap: 6, minHeight: mobile ? MIN_TAP_TARGET : undefined }}>
+              <input type="checkbox" {...register(field)} style={{ width: 18, height: 18 }} />
               {field.replace('sl_', '')}
             </label>
           ))}
@@ -162,11 +165,13 @@ export function LeaveRequestForm({ t }: LeaveRequestFormProps) {
         disabled={isSubmitting || submitLeave.isPending}
         style={{
           padding: '10px 14px',
+          minHeight: MIN_TAP_TARGET,
           borderRadius: 6,
           border: 'none',
           background: t.pA,
           color: '#fff',
           fontWeight: 600,
+          fontSize: 14,
           cursor: submitLeave.isPending ? 'default' : 'pointer',
           opacity: submitLeave.isPending ? 0.7 : 1,
         }}

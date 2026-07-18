@@ -1,7 +1,10 @@
+import { useEffect } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { ProtectedRoute } from './auth/ProtectedRoute';
 import LoginPage from './auth/LoginPage';
 import { Layout } from './components/layout/Layout';
+import { useAppStore } from './store/useAppStore';
+import { applyThemeToDocument } from './theme/tokens';
 
 import DutyBoard from './pages/DutyBoard';
 import Roster from './pages/Roster';
@@ -18,6 +21,15 @@ import Audit from './pages/Audit';
 import Settings from './pages/Settings';
 
 export default function App() {
+  const theme = useAppStore((s) => s.theme);
+
+  // Mirrors tokens.ts onto CSS custom properties for every plain-CSS rule in
+  // index.css (focus rings, table hover/sticky header, scrollbars) — applied
+  // once at the app root so it's active on the pre-auth login screen too.
+  useEffect(() => {
+    applyThemeToDocument(theme);
+  }, [theme]);
+
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />

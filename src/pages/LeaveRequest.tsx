@@ -12,7 +12,7 @@ export default function LeaveRequest() {
   return (
     <div style={{ maxWidth: 560 }}>
       <Card t={t}>
-        <h2 style={{ fontSize: 15, color: t.text, marginTop: 0 }}>New Leave Request</h2>
+        <h2 style={{ fontSize: 17, fontWeight: 650, color: t.text, marginTop: 0 }}>New Leave Request</h2>
         <LeaveRequestForm t={t} bp={bp} />
       </Card>
     </div>

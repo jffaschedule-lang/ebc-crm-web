@@ -1,17 +1,19 @@
 import { useAppStore } from '../store/useAppStore';
 import { tokensFor } from '../theme/tokens';
-import { useBreakpoint } from '../hooks/useBreakpoint';
+import { useBreakpoint, isMobile } from '../hooks/useBreakpoint';
 import { useAuditLog } from '../hooks/useAuditLog';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { AlertBar } from '../components/ui/AlertBar';
 import { RTable, RTableColumn } from '../components/ui/RTable';
 import { Card } from '../components/ui/Card';
 import { AuditLogEntry } from '../types/domain';
+import { MIN_TAP_TARGET } from '../theme/spacing';
 
 export default function Audit() {
   const theme = useAppStore((s) => s.theme);
   const t = tokensFor(theme);
   const bp = useBreakpoint();
+  const mobile = isMobile(bp);
 
   const { data, isLoading, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useAuditLog();
 
@@ -28,11 +30,19 @@ export default function Audit() {
   return (
     <div>
       {isLoading && <LoadingSpinner t={t} size={32} />}
-      {error && <AlertBar t={t} type="crit">Failed to load audit log (requires supervisor role).</AlertBar>}
+      {error && <AlertBar t={t} type="crit">Couldn't load the audit log — this view requires the supervisor role.</AlertBar>}
 
       {!isLoading && !error && (
         <>
-          <RTable t={t} bp={bp} cols={cols} rows={rows} rowKey={(r) => r.id} />
+          <RTable
+            t={t}
+            bp={bp}
+            cols={cols}
+            rows={rows}
+            rowKey={(r) => r.id}
+            maxHeight={mobile ? undefined : 560}
+            emptyMessage="No audit activity recorded yet."
+          />
 
           {hasNextPage && (
             <button
@@ -42,11 +52,14 @@ export default function Audit() {
               style={{
                 marginTop: 12,
                 padding: '8px 14px',
+                minHeight: mobile ? MIN_TAP_TARGET : undefined,
                 borderRadius: 6,
                 border: `1px solid ${t.border}`,
                 background: t.surfaceAlt,
                 color: t.text,
                 cursor: 'pointer',
+                fontSize: 13,
+                width: mobile ? '100%' : undefined,
               }}
             >
               {isFetchingNextPage ? 'Loading…' : 'Load more'}
@@ -56,7 +69,7 @@ export default function Audit() {
       )}
 
       <Card t={t} style={{ marginTop: 20 }}>
-        <h3 style={{ fontSize: 13, color: t.text, marginTop: 0 }}>Notification Outbox &amp; Roles</h3>
+        <h3 style={{ fontSize: 14, fontWeight: 650, color: t.text, marginTop: 0 }}>Notification Outbox &amp; Roles</h3>
         <p style={{ fontSize: 12, color: t.textMuted, margin: 0 }}>
           Outbox and role-assignment views require the corresponding admin API endpoints — not yet exposed
           beyond service-role access. The audit trail above already captures every mutation (leave, shift close,

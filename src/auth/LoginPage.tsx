@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { useAuth } from './useAuth';
 import { useAppStore } from '../store/useAppStore';
 import { tokensFor } from '../theme/tokens';
+import { MIN_TAP_TARGET } from '../theme/spacing';
 
 const loginSchema = z.object({
   email: z.string().email('Enter a valid email address'),
@@ -74,11 +75,13 @@ export default function LoginPage() {
           style={{
             width: '100%',
             padding: '10px 12px',
+            minHeight: MIN_TAP_TARGET,
             borderRadius: 6,
             border: `1px solid ${t.border}`,
             background: t.surfaceAlt,
             color: t.text,
             marginBottom: 4,
+            fontSize: 14,
           }}
         />
         {errors.email && (
@@ -96,11 +99,13 @@ export default function LoginPage() {
           style={{
             width: '100%',
             padding: '10px 12px',
+            minHeight: MIN_TAP_TARGET,
             borderRadius: 6,
             border: `1px solid ${t.border}`,
             background: t.surfaceAlt,
             color: t.text,
             marginBottom: 4,
+            fontSize: 14,
           }}
         />
         {errors.password && (
@@ -118,11 +123,13 @@ export default function LoginPage() {
             width: '100%',
             marginTop: 20,
             padding: '10px 12px',
+            minHeight: MIN_TAP_TARGET,
             borderRadius: 6,
             border: 'none',
             background: t.pA,
             color: '#fff',
             fontWeight: 600,
+            fontSize: 14,
             cursor: isSubmitting ? 'default' : 'pointer',
             opacity: isSubmitting ? 0.7 : 1,
           }}

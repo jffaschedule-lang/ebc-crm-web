@@ -1,0 +1,90 @@
+/* Global stylesheet. Color values here are CSS custom properties mirrored
+   from src/theme/tokens.ts (see applyThemeToDocument) — never a literal hex
+   value in this file either, same rule as component files. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Deliberate, on-brand focus ring on every interactive element — never rely
+   on the browser default, which may not meet contrast against an arbitrary
+   theme surface. */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--focusRing);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Table interaction: hover + sticky header. Inline styles can't express
+   :hover or position:sticky-on-scroll cleanly, hence these two global
+   classes used by RTable. */
+.rtable-scroll {
+  overflow-x: auto;
+}
+
+.rtable thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--surfaceAlt);
+}
+
+.rtable tbody tr {
+  transition: background-color 120ms ease;
+}
+
+.rtable tbody tr:hover {
+  background: var(--surfaceAlt);
+}
+
+/* Scrollbar — thin, theme-matched, not the OS default which can clash. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

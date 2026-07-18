@@ -1,4 +1,5 @@
 import { ThemeTokens } from '../../theme/tokens';
+import { FONT_MONO } from '../../theme/typography';
 
 interface MetricCardProps {
   t: ThemeTokens;
@@ -17,10 +18,21 @@ export function MetricCard({ t, label, value, sub }: MetricCardProps) {
         padding: '14px 16px',
       }}
     >
-      <div style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 0.6, color: t.textMuted }}>
+      <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.6, color: t.textMuted }}>
         {label}
       </div>
-      <div style={{ fontSize: 26, fontWeight: 700, color: t.text, marginTop: 4 }}>{value}</div>
+      <div
+        style={{
+          fontSize: 26,
+          fontWeight: 700,
+          color: t.text,
+          marginTop: 4,
+          fontFamily: FONT_MONO,
+          fontVariantNumeric: 'tabular-nums',
+        }}
+      >
+        {value}
+      </div>
       {sub && <div style={{ fontSize: 12, color: t.textFaint, marginTop: 2 }}>{sub}</div>}
     </div>
   );

@@ -1,21 +1,18 @@
 import { useLocation } from 'react-router-dom';
 import { useAppStore } from '../../store/useAppStore';
-import { useBreakpoint, isDesktop } from '../../hooks/useBreakpoint';
 import { tokensFor } from '../../theme/tokens';
+import { useBreakpoint, isMobile } from '../../hooks/useBreakpoint';
 import { NAV_ITEMS } from '../../config/nav';
+import { SearchIcon } from '../ui/Icon';
 
 export function Topbar() {
   const theme = useAppStore((s) => s.theme);
-  const toggleTheme = useAppStore((s) => s.toggleTheme);
-  const setDrawerOpen = useAppStore((s) => s.setDrawerOpen);
-  const bp = useBreakpoint();
   const t = tokensFor(theme);
   const location = useLocation();
+  const bp = useBreakpoint();
+  const mobile = isMobile(bp);
 
   const current = NAV_ITEMS.find((n) => (n.path === '/' ? location.pathname === '/' : location.pathname.startsWith(n.path)));
-  const desktop = isDesktop(bp);
-  const showHamburger = !desktop;
-  const mobile = bp === 'xs' || bp === 'sm';
 
   return (
     <header
@@ -32,49 +29,35 @@ export function Topbar() {
         zIndex: 30,
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
-        {showHamburger && (
-          <button
-            type="button"
-            onClick={() => setDrawerOpen(true)}
-            aria-label="Open navigation"
-            style={{
-              border: `1px solid ${t.border}`,
-              background: t.surfaceAlt,
-              borderRadius: 6,
-              padding: '6px 10px',
-              cursor: 'pointer',
-              color: t.text,
-            }}
-          >
-            ☰
-          </button>
-        )}
-        <div style={{ minWidth: 0 }}>
-          <h1 style={{ fontSize: 15, color: t.text, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-            {current?.label ?? 'EBC Workforce CRM'}
-          </h1>
-          <p style={{ fontSize: 11, color: t.textMuted, margin: 0 }}>EBC / JPFD Workforce CRM</p>
-        </div>
+      <div style={{ minWidth: 0 }}>
+        <h1 style={{ fontSize: 17, fontWeight: 650, color: t.text, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          {current?.label ?? 'EBC Workforce CRM'}
+        </h1>
+        <p style={{ fontSize: 11, color: t.textMuted, margin: 0 }}>EBC / JPFD Workforce CRM</p>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        {!mobile && (
-          <input
-            type="search"
-            placeholder="Search…"
-            style={{
-              padding: '7px 10px',
-              borderRadius: 6,
-              border: `1px solid ${t.border}`,
-              background: t.surfaceAlt,
-              color: t.text,
-              fontSize: 13,
-              width: 200,
-            }}
-          />
-        )}
-        {!mobile && (
+      {!mobile && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ position: 'relative' }}>
+            <SearchIcon
+              size={14}
+              style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: t.textFaint }}
+            />
+            <input
+              type="search"
+              placeholder="Search…"
+              aria-label="Search"
+              style={{
+                padding: '7px 10px 7px 30px',
+                borderRadius: 6,
+                border: `1px solid ${t.border}`,
+                background: t.surfaceAlt,
+                color: t.text,
+                fontSize: 13,
+                width: 200,
+              }}
+            />
+          </div>
           <button
             type="button"
             style={{
@@ -84,30 +67,14 @@ export function Topbar() {
               background: t.pA,
               color: '#fff',
               fontSize: 13,
+              fontWeight: 600,
               cursor: 'pointer',
             }}
           >
             New Record
           </button>
-        )}
-        {mobile && (
-          <button
-            type="button"
-            onClick={toggleTheme}
-            aria-label="Toggle theme"
-            style={{
-              border: `1px solid ${t.border}`,
-              background: t.surfaceAlt,
-              borderRadius: 6,
-              padding: '6px 10px',
-              cursor: 'pointer',
-              color: t.text,
-            }}
-          >
-            {theme === 'dark' ? '☀' : '🌙'}
-          </button>
-        )}
-      </div>
+        </div>
+      )}
     </header>
   );
 }

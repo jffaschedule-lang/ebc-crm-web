@@ -4,6 +4,8 @@ import { z } from 'zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ThemeTokens } from '../../theme/tokens';
 import { apiPost } from '../../api/client';
+import { useBreakpoint, isMobile } from '../../hooks/useBreakpoint';
+import { MIN_TAP_TARGET } from '../../theme/spacing';
 
 const schema = z.object({
   employee_id: z.string().uuid('Select an employee'),
@@ -22,6 +24,8 @@ interface OTAvailabilityFormProps {
 }
 
 export function OTAvailabilityForm({ t, employeeId }: OTAvailabilityFormProps) {
+  const bp = useBreakpoint();
+  const mobile = isMobile(bp);
   const queryClient = useQueryClient();
   const {
     register,
@@ -50,6 +54,7 @@ export function OTAvailabilityForm({ t, employeeId }: OTAvailabilityFormProps) {
   const inputStyle: React.CSSProperties = {
     width: '100%',
     padding: '8px 10px',
+    minHeight: mobile ? MIN_TAP_TARGET : undefined,
     borderRadius: 6,
     border: `1px solid ${t.border}`,
     background: t.surfaceAlt,
@@ -63,7 +68,7 @@ export function OTAvailabilityForm({ t, employeeId }: OTAvailabilityFormProps) {
       onSubmit={handleSubmit((values) => mutation.mutate(values))}
       style={{ display: 'flex', flexDirection: 'column', gap: 12 }}
     >
-      <div style={{ display: 'flex', gap: 10 }}>
+      <div style={{ display: 'flex', flexDirection: mobile ? 'column' : 'row', gap: mobile ? 14 : 10 }}>
         <div style={{ flex: 1 }}>
           <label style={labelStyle}>Available From</label>
           <input type="date" {...register('available_from')} style={inputStyle} />
@@ -101,11 +106,13 @@ export function OTAvailabilityForm({ t, employeeId }: OTAvailabilityFormProps) {
         disabled={isSubmitting || mutation.isPending}
         style={{
           padding: '9px 14px',
+          minHeight: MIN_TAP_TARGET,
           borderRadius: 6,
           border: 'none',
           background: t.pA,
           color: '#fff',
           fontWeight: 600,
+          fontSize: 13,
           cursor: 'pointer',
         }}
       >
