@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { ThemeTokens } from '../../theme/tokens';
+import { useBreakpoint, isMobile } from '../../hooks/useBreakpoint';
+import { MIN_TAP_TARGET } from '../../theme/spacing';
 import { XIcon, AlertCircleIcon } from './Icon';
 
 interface DismissibleInfoBarProps {
@@ -19,6 +21,8 @@ function wasDismissed(key: string): boolean {
 
 /** Shows once per browser session; dismissing writes to sessionStorage so it stays gone until the tab closes. */
 export function DismissibleInfoBar({ t, storageKey, children }: DismissibleInfoBarProps) {
+  const bp = useBreakpoint();
+  const mobile = isMobile(bp);
   const [dismissed, setDismissed] = useState(() => wasDismissed(storageKey));
 
   if (dismissed) return null;
@@ -59,8 +63,9 @@ export function DismissibleInfoBar({ t, storageKey, children }: DismissibleInfoB
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          width: 24,
-          height: 24,
+          width: mobile ? MIN_TAP_TARGET : 24,
+          height: mobile ? MIN_TAP_TARGET : 24,
+          margin: mobile ? -10 : 0,
           flexShrink: 0,
           background: 'transparent',
           border: 'none',

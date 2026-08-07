@@ -5,7 +5,7 @@ import { usePendingLeaveCount } from '../../hooks/usePendingLeaveCount';
 import { tokensFor } from '../../theme/tokens';
 import { NAV_ITEMS } from '../../config/nav';
 import { useAuth } from '../../auth/useAuth';
-import { PaletteIcon, LogOutIcon } from '../ui/Icon';
+import { SunIcon, MoonIcon, LogOutIcon } from '../ui/Icon';
 import { MIN_TAP_TARGET } from '../../theme/spacing';
 
 const WIDTH_BY_BP: Record<string, number> = {
@@ -55,7 +55,7 @@ export function Sidebar() {
           <strong style={{ fontSize: 14, color: '#fff', letterSpacing: 0.2 }}>EBC Workforce CRM</strong>
         </div>
         <div style={{ fontSize: 10, color: t.textFaint, marginTop: 4, letterSpacing: 0.5 }}>
-          PROTOTYPE · DUMMY DATA
+          EBC / JPFD FIRE DEPARTMENT
         </div>
       </div>
 
@@ -135,7 +135,7 @@ export function Sidebar() {
           <button
             type="button"
             onClick={cycleTheme}
-            aria-label="Cycle theme"
+            aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
             style={{
               flex: 1,
               minHeight: mobile ? MIN_TAP_TARGET : 32,
@@ -152,8 +152,8 @@ export function Sidebar() {
               cursor: 'pointer',
             }}
           >
-            <PaletteIcon size={15} />
-            Theme
+            {theme === 'dark' ? <SunIcon size={15} /> : <MoonIcon size={15} />}
+            {theme === 'dark' ? 'Light' : 'Dark'}
           </button>
           <button
             type="button"

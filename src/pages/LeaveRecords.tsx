@@ -7,6 +7,7 @@ import { MIN_TAP_TARGET } from '../theme/spacing';
 import { apiGet, apiPatch } from '../api/client';
 import { LeaveRecord } from '../types/domain';
 import { useLeaveSlots } from '../hooks/useLeaveSlots';
+import { useMyRole } from '../hooks/useMyRole';
 import { MetricCard } from '../components/ui/MetricCard';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { AlertBar } from '../components/ui/AlertBar';
@@ -23,6 +24,7 @@ export default function LeaveRecords() {
   const mobile = isMobile(bp);
   const tablet = isTablet(bp);
   const queryClient = useQueryClient();
+  const { isSupervisorOrAdmin } = useMyRole();
 
   const [statusFilter, setStatusFilter] = useState('');
   const [dateFilter, setDateFilter] = useState('');
@@ -59,28 +61,32 @@ export default function LeaveRecords() {
     { key: 'date', header: 'Shift Date', render: (r) => r.shift_date },
     { key: 'span', header: 'Span', render: (r) => `${r.span_start}–${r.span_end}`, hideAt: ['md', 'lg'] },
     { key: 'status', header: 'Status', render: (r) => <StatusChip t={t} status={r.status} /> },
-    {
-      key: 'actions',
-      header: '',
-      render: (r) =>
-        r.status === 'PendingApproval' || r.status === 'Waitlist' ? (
-          <button
-            type="button"
-            onClick={() => updateStatus.mutate({ id: r.id, status: 'Granted' })}
-            style={{
-              padding: '4px 10px',
-              borderRadius: 6,
-              border: 'none',
-              background: t.ok,
-              color: '#fff',
-              fontSize: 12,
-              cursor: 'pointer',
-            }}
-          >
-            Approve
-          </button>
-        ) : null,
-    },
+    ...(isSupervisorOrAdmin
+      ? [
+          {
+            key: 'actions',
+            header: '',
+            render: (r: LeaveRecord) =>
+              r.status === 'PendingApproval' || r.status === 'Waitlist' ? (
+                <button
+                  type="button"
+                  onClick={() => updateStatus.mutate({ id: r.id, status: 'Granted' })}
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: 6,
+                    border: 'none',
+                    background: t.ok,
+                    color: '#fff',
+                    fontSize: 12,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Approve
+                </button>
+              ) : null,
+          } as RTableColumn<LeaveRecord>,
+        ]
+      : []),
   ];
 
   const hasFilters = Boolean(statusFilter || dateFilter);
@@ -157,6 +163,26 @@ export default function LeaveRecords() {
                 <div style={{ fontSize: 11, color: t.textMuted, marginTop: 4, fontFamily: 'ui-monospace, SF Mono, Consolas, monospace' }}>
                   {r.span_start}–{r.span_end}
                 </div>
+                {isSupervisorOrAdmin && (r.status === 'PendingApproval' || r.status === 'Waitlist') && (
+                  <button
+                    type="button"
+                    onClick={() => updateStatus.mutate({ id: r.id, status: 'Granted' })}
+                    style={{
+                      marginTop: 8,
+                      padding: '6px 14px',
+                      minHeight: MIN_TAP_TARGET,
+                      borderRadius: 6,
+                      border: 'none',
+                      background: t.ok,
+                      color: '#fff',
+                      fontSize: 12,
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Approve
+                  </button>
+                )}
               </div>
             )}
           />
@@ -188,23 +214,25 @@ export default function LeaveRecords() {
               <span style={{ fontSize: 13, color: t.text, flex: 1 }}>
                 {r.entry_id} · {r.leave_type} · {r.shift_date}
               </span>
-              <button
-                type="button"
-                onClick={() => updateStatus.mutate({ id: r.id, status: 'Granted' })}
-                style={{
-                  padding: '8px 14px',
-                  minHeight: mobile ? MIN_TAP_TARGET : undefined,
-                  borderRadius: 6,
-                  border: 'none',
-                  background: t.ok,
-                  color: '#fff',
-                  fontSize: 13,
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                }}
-              >
-                Approve
-              </button>
+              {isSupervisorOrAdmin && (
+                <button
+                  type="button"
+                  onClick={() => updateStatus.mutate({ id: r.id, status: 'Granted' })}
+                  style={{
+                    padding: '8px 14px',
+                    minHeight: mobile ? MIN_TAP_TARGET : undefined,
+                    borderRadius: 6,
+                    border: 'none',
+                    background: t.ok,
+                    color: '#fff',
+                    fontSize: 13,
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Approve
+                </button>
+              )}
             </div>
           ))}
         </Card>

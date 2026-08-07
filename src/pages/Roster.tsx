@@ -32,6 +32,7 @@ export default function Roster() {
   const tablet = isTablet(bp);
 
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [platoonFilter, setPlatoonFilter] = useState('');
   const [rankFilter, setRankFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState<'' | EmployeeStatus>('');
@@ -41,11 +42,18 @@ export default function Roster() {
   const { isSupervisorOrAdmin } = useMyRole();
   const setStatus = useSetEmployeeStatus();
 
+  // Debounce the search box so we don't fire a new request on every
+  // keystroke — wait 300ms after the user stops typing.
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(timer);
+  }, [search]);
+
   const { data, isLoading, error } = useQuery({
-    queryKey: ['employees', search, platoonFilter, rankFilter],
+    queryKey: ['employees', debouncedSearch, platoonFilter, rankFilter],
     queryFn: () =>
       apiGet<Employee[]>('/api/employees', {
-        search: search || undefined,
+        search: debouncedSearch || undefined,
         platoon: platoonFilter || undefined,
         rank: rankFilter || undefined,
         limit: 200,

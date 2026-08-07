@@ -78,6 +78,41 @@ textarea:focus-visible,
   background: transparent;
 }
 
+/* Main content container. Padding and max-width are handled with real CSS
+   @media rules (not JS) since they're pure styling, not a structural
+   component swap. Boundaries mirror src/theme/breakpoints.ts and the
+   matchMedia queries in src/hooks/useBreakpoint.ts — keep all three in
+   sync if a breakpoint ever changes. */
+.app-main {
+  padding: 20px 24px;
+}
+
+@media (max-width: 374px) {
+  .app-main {
+    padding: 14px 10px 72px;
+  }
+}
+
+@media (min-width: 375px) and (max-width: 767px) {
+  .app-main {
+    padding: 16px 12px 72px;
+  }
+}
+
+/* Ultra-wide desktop monitors: cap the reading width and center the
+   content instead of letting cards/tables stretch edge-to-edge. This is a
+   plain block-level wrapper INSIDE .app-main, not the flex item itself —
+   `margin: auto` on a flex item's cross-axis overrides `align-items:
+   stretch` per the flexbox spec, which would otherwise shrink .app-main
+   down to its content width instead of filling the sidebar's remaining
+   space. Keeping the cap on a nested non-flex-item div avoids that trap. */
+@media (min-width: 1600px) {
+  .app-main-inner {
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+}
+
 @keyframes ebc-spin {
   to {
     transform: rotate(360deg);

@@ -140,6 +140,7 @@ export function UserRolesTab({ t, bp, isAdmin, roleLoading }: TabProps) {
 }
 
 function AuthUsersSection({ t, bp, onAssignRole }: { t: ThemeTokens; bp: Breakpoint; onAssignRole: (email: string) => void }) {
+  const mobile = isMobile(bp);
   const { data, isLoading, error } = useAdminUsers(true);
   const rows = data ?? [];
 
@@ -162,6 +163,7 @@ function AuthUsersSection({ t, bp, onAssignRole }: { t: ThemeTokens; bp: Breakpo
           disabled={!u.email}
           style={{
             padding: '5px 10px',
+            minHeight: mobile ? MIN_TAP_TARGET : undefined,
             borderRadius: 6,
             border: `1px solid ${t.border}`,
             background: t.surfaceAlt,
@@ -597,7 +599,7 @@ function CreateStaffAccountSection({ t, bp }: { t: ThemeTokens; bp: Breakpoint }
               minLength={8}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              style={{ ...inputStyle, paddingRight: 40 }}
+              style={{ ...inputStyle, paddingRight: mobile ? 48 : 40 }}
             />
             <button
               type="button"
@@ -605,14 +607,14 @@ function CreateStaffAccountSection({ t, bp }: { t: ThemeTokens; bp: Breakpoint }
               aria-label={showPassword ? 'Hide password' : 'Show password'}
               style={{
                 position: 'absolute',
-                right: 4,
+                right: mobile ? 0 : 4,
                 top: '50%',
                 transform: 'translateY(-50%)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                width: 32,
-                height: 32,
+                width: mobile ? MIN_TAP_TARGET : 32,
+                height: mobile ? MIN_TAP_TARGET : 32,
                 background: 'transparent',
                 border: 'none',
                 color: t.textMuted,

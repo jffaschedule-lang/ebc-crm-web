@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ThemeTokens } from '../../theme/tokens';
 import { Breakpoint, isMobile } from '../../hooks/useBreakpoint';
 import { useCompanies, useCreateCompany, useUpdateCompany, CompanyInput } from '../../hooks/useCompanies';
+import { useMyRole } from '../../hooks/useMyRole';
 import { Company } from '../../types/domain';
 import { Card } from '../../components/ui/Card';
 import { AlertBar } from '../../components/ui/AlertBar';
@@ -107,12 +108,12 @@ function EditRow({ t, mobile, draft, setDraft, isNew, pending, isError, errorMes
           />
         </div>
       </div>
-      <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: t.text }}>
+      <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: t.text, minHeight: mobile ? MIN_TAP_TARGET : undefined }}>
         <input
           type="checkbox"
           checked={draft.records_only}
           onChange={(e) => setDraft((d) => ({ ...d, records_only: e.target.checked }))}
-          style={{ width: 16, height: 16 }}
+          style={{ width: 16, height: 16, flexShrink: 0 }}
         />
         Records only (not a staffed station)
       </label>
@@ -167,6 +168,7 @@ function EditRow({ t, mobile, draft, setDraft, isNew, pending, isError, errorMes
 
 export function DistrictsTab({ t, bp }: TabProps) {
   const mobile = isMobile(bp);
+  const { isAdmin } = useMyRole();
   const { data, isLoading, error } = useCompanies();
   const createCompany = useCreateCompany();
   const updateCompany = useUpdateCompany();
@@ -249,7 +251,7 @@ export function DistrictsTab({ t, bp }: TabProps) {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
         <h2 style={{ fontSize: 17, fontWeight: 650, color: t.text, margin: 0 }}>District &amp; Company Configuration</h2>
-        {editing === null && (
+        {isAdmin && editing === null && (
           <button
             type="button"
             onClick={startAdd}
@@ -274,6 +276,11 @@ export function DistrictsTab({ t, bp }: TabProps) {
         )}
       </div>
 
+      {!isAdmin && (
+        <AlertBar t={t} type="warn">
+          You're viewing this in read-only mode. Adding or editing companies requires the admin role.
+        </AlertBar>
+      )}
       {successMsg && <AlertBar t={t} type="ok">{successMsg}</AlertBar>}
 
       <Card t={t}>
@@ -346,27 +353,29 @@ export function DistrictsTab({ t, bp }: TabProps) {
                         <td style={{ padding: '8px 12px', color: t.textMuted }}>{c.suffix_rule ?? '—'}</td>
                         <td style={{ padding: '8px 12px', color: t.text }}>{c.records_only ? 'Yes' : 'No'}</td>
                         <td style={{ padding: '8px 12px' }}>
-                          <button
-                            type="button"
-                            onClick={() => startEdit(c)}
-                            disabled={editing !== null}
-                            aria-label={`Edit ${c.code}`}
-                            style={{
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              width: mobile ? MIN_TAP_TARGET : 30,
-                              height: mobile ? MIN_TAP_TARGET : 30,
-                              borderRadius: 6,
-                              border: `1px solid ${t.border}`,
-                              background: t.surfaceAlt,
-                              color: t.textMuted,
-                              cursor: editing !== null ? 'default' : 'pointer',
-                              opacity: editing !== null ? 0.5 : 1,
-                            }}
-                          >
-                            <PencilIcon size={14} />
-                          </button>
+                          {isAdmin && (
+                            <button
+                              type="button"
+                              onClick={() => startEdit(c)}
+                              disabled={editing !== null}
+                              aria-label={`Edit ${c.code}`}
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                width: mobile ? MIN_TAP_TARGET : 30,
+                                height: mobile ? MIN_TAP_TARGET : 30,
+                                borderRadius: 6,
+                                border: `1px solid ${t.border}`,
+                                background: t.surfaceAlt,
+                                color: t.textMuted,
+                                cursor: editing !== null ? 'default' : 'pointer',
+                                opacity: editing !== null ? 0.5 : 1,
+                              }}
+                            >
+                              <PencilIcon size={14} />
+                            </button>
+                          )}
                         </td>
                       </tr>
                     )

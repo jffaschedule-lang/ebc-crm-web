@@ -3,7 +3,6 @@ import { useQuery } from '@tanstack/react-query';
 import { useAppStore } from '../store/useAppStore';
 import { tokensFor } from '../theme/tokens';
 import { useBreakpoint, isMobile } from '../hooks/useBreakpoint';
-import { useAuth } from '../auth/useAuth';
 import { apiGet } from '../api/client';
 import { OtRequest, OtTierBoardRow } from '../types/domain';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
@@ -13,6 +12,7 @@ import { Card } from '../components/ui/Card';
 import { PlatoonChip } from '../components/ui/PlatoonChip';
 import { Pill } from '../components/ui/Pill';
 import { OTAvailabilityForm } from '../components/forms/OTAvailabilityForm';
+import { useMyRole } from '../hooks/useMyRole';
 import { MIN_TAP_TARGET } from '../theme/spacing';
 
 const RANK_GROUPS = ['ac', 'dc', 'capt', 'lt', 'op', 'ff'];
@@ -23,7 +23,7 @@ export default function Overtime() {
   const t = tokensFor(theme);
   const bp = useBreakpoint();
   const mobile = isMobile(bp);
-  const { user } = useAuth();
+  const { employeeId, isLoading: meLoading } = useMyRole();
 
   const [rankGroup, setRankGroup] = useState('ff');
 
@@ -130,7 +130,13 @@ export default function Overtime() {
 
         <Card t={t}>
           <h3 style={{ fontSize: 14, fontWeight: 650, color: t.text, marginTop: 0, marginBottom: 10 }}>Add Availability</h3>
-          <OTAvailabilityForm t={t} employeeId={user?.id ?? ''} />
+          {meLoading && <LoadingSpinner t={t} size={24} />}
+          {!meLoading && employeeId && <OTAvailabilityForm t={t} employeeId={employeeId} />}
+          {!meLoading && !employeeId && (
+            <AlertBar t={t} type="warn">
+              Your login isn't linked to an employee record yet, so you can't add OT availability. Ask an admin to check Settings → User Roles.
+            </AlertBar>
+          )}
         </Card>
       </div>
     </div>

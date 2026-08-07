@@ -7,8 +7,10 @@ import { useBreakpoint, isMobile } from '../hooks/useBreakpoint';
 import { apiGet } from '../api/client';
 import { ShiftClose as ShiftCloseType } from '../types/domain';
 import { Card } from '../components/ui/Card';
+import { AlertBar } from '../components/ui/AlertBar';
 import { StatusChip } from '../components/ui/StatusChip';
 import { ShiftCloseForm } from '../components/forms/ShiftCloseForm';
+import { useMyRole } from '../hooks/useMyRole';
 import { MIN_TAP_TARGET } from '../theme/spacing';
 
 const TODAY = format(new Date(), 'yyyy-MM-dd');
@@ -19,6 +21,7 @@ export default function ShiftClose() {
   const bp = useBreakpoint();
   const mobile = isMobile(bp);
 
+  const { isSupervisorOrAdmin, isLoading: roleLoading } = useMyRole();
   const [date, setDate] = useState(TODAY);
   const [station, setStation] = useState('');
   const [platoon, setPlatoon] = useState<'A' | 'B' | 'C'>('A');
@@ -70,7 +73,14 @@ export default function ShiftClose() {
         </Card>
       )}
 
-      {station && (
+      {station && !roleLoading && !isSupervisorOrAdmin && (
+        <AlertBar t={t} type="warn">
+          Closing a shift requires the supervisor or admin role. You can view duty records for {station} elsewhere,
+          but only a supervisor can sign and close this shift.
+        </AlertBar>
+      )}
+
+      {station && isSupervisorOrAdmin && (
         <Card t={t}>
           <h3 style={{ fontSize: 14, fontWeight: 650, color: t.text, marginTop: 0, marginBottom: 10 }}>
             Close Shift — {station} — {date}

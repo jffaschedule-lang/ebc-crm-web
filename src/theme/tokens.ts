@@ -1,15 +1,14 @@
 // Every color used anywhere in the app must come from here — no hardcoded
 // hex values in component files (see project constraint #11).
 //
-// Three themes, contrast-verified at build-design-time (see the ratio
-// computation used while authoring these — every text/bg and every
-// status-fg/status-bg AND status-fg/surface pairing is >=4.5:1, WCAG AA).
-// Each duty-status token keeps the SAME hue across all three themes (orange
-// is always Train, teal is always DET) — only lightness/saturation shifts
-// per theme's purpose, so meaning transfers even if a user switches themes
-// mid-shift.
+// Two themes — Dark and Light — contrast-verified at build-design-time:
+// every text/bg and every status-fg/status-bg AND status-fg/surface pairing
+// is >=4.5:1, WCAG AA. Each duty-status token keeps the SAME hue across both
+// themes (orange is always Train, teal is always DET) — only
+// lightness/saturation shifts per theme, so meaning transfers instantly
+// when a user switches themes mid-shift.
 
-export type ThemeName = 'command' | 'daywatch' | 'field';
+export type ThemeName = 'dark' | 'light';
 
 export interface ThemeTokens {
   bg: string;
@@ -26,7 +25,7 @@ export interface ThemeTokens {
   pB: string;
   pC: string;
 
-  // Duty-status hues. Fixed meaning across all three themes:
+  // Duty-status hues. Fixed meaning across both themes:
   ok: string; okBg: string; // O — on duty
   train: string; trainBg: string; // Train — duty, excluded from on-duty count
   info: string; infoBg: string; // AL / general leave
@@ -44,113 +43,80 @@ export interface ThemeTokens {
   focusRing: string;
 }
 
-/** Command — dark console theme for control-room / overnight-shift use. */
-export const COMMAND: ThemeTokens = {
-  bg: '#12161c',
-  surface: '#1a2029',
-  surfaceAlt: '#212834',
-  border: '#333c49',
-  text: '#dde2e8',
-  textMuted: '#9aa5b3',
-  textFaint: '#6d7887',
+/** Dark — sleek slate-and-ember console theme. Default theme. */
+export const DARK: ThemeTokens = {
+  bg: '#0b0e14',
+  surface: '#131722',
+  surfaceAlt: '#1a2030',
+  border: '#2a3142',
+  text: '#e8ebf1',
+  textMuted: '#9aa4b8',
+  textFaint: '#6c7789',
 
-  pA: '#b3453f',
-  pB: '#3f6fb3',
-  pC: '#347a4d',
+  pA: '#e05a4f',
+  pB: '#5b9bf0',
+  pC: '#3fbf7f',
 
-  ok: '#5fbf8a', okBg: '#16261e',
-  train: '#d98e4f', trainBg: '#2c2015',
-  info: '#6ea3d8', infoBg: '#16212f',
-  warn: '#c9a548', warnBg: '#28230f',
-  det: '#4fb8b0', detBg: '#132523',
-  mwa: '#a68adf', mwaBg: '#211c2e',
-  ot: '#dd7fa8', otBg: '#2a1620',
-  crit: '#e6746b', critBg: '#2b1613',
+  ok: '#4ade80', okBg: '#132a1d',
+  train: '#fb923c', trainBg: '#2b1f11',
+  info: '#60a5fa', infoBg: '#13212f',
+  warn: '#fbbf24', warnBg: '#2b230e',
+  det: '#2dd4bf', detBg: '#0f2624',
+  mwa: '#b391f5', mwaBg: '#211c33',
+  ot: '#f472b6', otBg: '#2b1620',
+  crit: '#f87171', critBg: '#2c1512',
 
-  metricBg: '#1f2530',
-  sidebarBg: '#0d1015',
-  sidebarText: '#b7c0cc',
-  sidebarActiveBg: '#212834',
-  shadow: '0 1px 3px rgba(0, 0, 0, 0.45)',
-  focusRing: '#6ea3d8',
+  metricBg: '#171c28',
+  sidebarBg: '#090b10',
+  sidebarText: '#b6bfcf',
+  sidebarActiveBg: '#1a2030',
+  shadow: '0 4px 16px rgba(0, 0, 0, 0.45)',
+  focusRing: '#5b9bf0',
 };
 
-/** Daywatch — light, high-clarity theme for daytime office use. */
-export const DAYWATCH: ThemeTokens = {
-  bg: '#f2f1ec',
+/** Light — crisp, high-clarity workspace theme with a dark sidebar. */
+export const LIGHT: ThemeTokens = {
+  bg: '#f4f5f7',
   surface: '#ffffff',
-  surfaceAlt: '#e9e7df',
-  border: '#cfccc0',
-  text: '#20242b',
-  textMuted: '#565f6b',
-  textFaint: '#7c8591',
+  surfaceAlt: '#eef0f4',
+  border: '#dde1e8',
+  text: '#161a23',
+  textMuted: '#565f70',
+  textFaint: '#7c869a',
 
-  pA: '#9c2e28',
+  pA: '#c23b2f',
   pB: '#1d4ed8',
   pC: '#15803d',
 
-  ok: '#0f7a45', okBg: '#dcf0e3',
-  train: '#a34c0a', trainBg: '#fbe6d4',
-  info: '#1856b8', infoBg: '#dbe8fb',
-  warn: '#8a6400', warnBg: '#f6ecc9',
-  det: '#0a6b64', detBg: '#d7f0ed',
-  mwa: '#6a3fc4', mwaBg: '#e8e0fa',
-  ot: '#b0195f', otBg: '#f9dcea',
-  crit: '#b8271f', critBg: '#fadcda',
+  ok: '#0f7a45', okBg: '#dcf5e5',
+  train: '#b45309', trainBg: '#fdead3',
+  info: '#1d54c9', infoBg: '#dce9fc',
+  warn: '#92650a', warnBg: '#f8edc9',
+  det: '#0a7a70', detBg: '#d6f3ef',
+  mwa: '#6d3fd1', mwaBg: '#ece3fc',
+  ot: '#b0195f', otBg: '#fadcec',
+  crit: '#c0271f', critBg: '#fbdcda',
 
-  metricBg: '#eae8e1',
-  sidebarBg: '#20242b',
-  sidebarText: '#c9cdd6',
-  sidebarActiveBg: '#2c313a',
-  shadow: '0 1px 3px rgba(15, 17, 21, 0.1)',
-  focusRing: '#1856b8',
-};
-
-/** Field — rugged, high-contrast theme for tablets mounted at the station. */
-export const FIELD: ThemeTokens = {
-  bg: '#242322',
-  surface: '#2e2c2a',
-  surfaceAlt: '#383533',
-  border: '#514c47',
-  text: '#f2ede4',
-  textMuted: '#c2b9ac',
-  textFaint: '#948b7e',
-
-  pA: '#b3392f',
-  pB: '#3568a8',
-  pC: '#3d7a3f',
-
-  ok: '#7dc468', okBg: '#26301d',
-  train: '#f0a028', trainBg: '#3a2a0c',
-  info: '#5b9fe0', infoBg: '#152736',
-  warn: '#f2c94c', warnBg: '#3a2f0a',
-  det: '#4fc4bd', detBg: '#0f2c29',
-  mwa: '#b79af0', mwaBg: '#251c38',
-  ot: '#f2799e', otBg: '#3a1521',
-  crit: '#f5645a', critBg: '#3a1310',
-
-  metricBg: '#343130',
-  sidebarBg: '#1a1817',
-  sidebarText: '#d6cec2',
-  sidebarActiveBg: '#3a3634',
-  shadow: '0 1px 4px rgba(0, 0, 0, 0.5)',
-  focusRing: '#f0a028',
+  metricBg: '#eceef2',
+  sidebarBg: '#161a23',
+  sidebarText: '#c6cdd9',
+  sidebarActiveBg: '#242a37',
+  shadow: '0 1px 3px rgba(15, 17, 21, 0.08)',
+  focusRing: '#1d54c9',
 };
 
 const THEMES: Record<ThemeName, ThemeTokens> = {
-  command: COMMAND,
-  daywatch: DAYWATCH,
-  field: FIELD,
+  dark: DARK,
+  light: LIGHT,
 };
 
 export const THEME_META: Record<ThemeName, { label: string; description: string }> = {
-  command: { label: 'Command', description: 'Dark console — control room / overnight shift' },
-  daywatch: { label: 'Daywatch', description: 'Light, high-clarity — daytime office' },
-  field: { label: 'Field', description: 'Rugged, high-contrast — station tablet' },
+  dark: { label: 'Dark', description: 'Sleek low-light console — control room / overnight shift' },
+  light: { label: 'Light', description: 'Crisp, high-clarity workspace — daytime office' },
 };
 
 export function tokensFor(theme: ThemeName): ThemeTokens {
-  return THEMES[theme] ?? COMMAND;
+  return THEMES[theme] ?? DARK;
 }
 
 /**

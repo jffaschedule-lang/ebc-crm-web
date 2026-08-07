@@ -14,6 +14,7 @@ import { RTable, RTableColumn } from '../components/ui/RTable';
 import { MobileList } from '../components/ui/MobileList';
 import { Plate } from '../components/ui/Plate';
 import { FONT_MONO } from '../theme/typography';
+import { useMyRole } from '../hooks/useMyRole';
 
 const TODAY = format(new Date(), 'yyyy-MM-dd');
 
@@ -24,6 +25,7 @@ export default function Payroll() {
   const mobile = isMobile(bp);
   const tablet = isTablet(bp);
   const queryClient = useQueryClient();
+  const { isSupervisorOrAdmin } = useMyRole();
 
   const [date, setDate] = useState(TODAY);
 
@@ -74,25 +76,27 @@ export default function Payroll() {
             flex: mobile ? '1 1 100%' : undefined,
           }}
         />
-        <button
-          type="button"
-          onClick={() => generateMutation.mutate()}
-          disabled={generateMutation.isPending}
-          style={{
-            padding: '8px 14px',
-            minHeight: mobile ? MIN_TAP_TARGET : undefined,
-            borderRadius: 6,
-            border: 'none',
-            background: t.pA,
-            color: '#fff',
-            fontWeight: 600,
-            fontSize: 13,
-            cursor: 'pointer',
-            flex: mobile ? '1 1 100%' : undefined,
-          }}
-        >
-          {generateMutation.isPending ? 'Generating…' : 'Generate Payroll'}
-        </button>
+        {isSupervisorOrAdmin && (
+          <button
+            type="button"
+            onClick={() => generateMutation.mutate()}
+            disabled={generateMutation.isPending}
+            style={{
+              padding: '8px 14px',
+              minHeight: mobile ? MIN_TAP_TARGET : undefined,
+              borderRadius: 6,
+              border: 'none',
+              background: t.pA,
+              color: '#fff',
+              fontWeight: 600,
+              fontSize: 13,
+              cursor: 'pointer',
+              flex: mobile ? '1 1 100%' : undefined,
+            }}
+          >
+            {generateMutation.isPending ? 'Generating…' : 'Generate Payroll'}
+          </button>
+        )}
       </div>
 
       <div

@@ -7,6 +7,7 @@ import { useBreakpoint, isMobile } from '../hooks/useBreakpoint';
 import { apiGet, apiPatch, apiPost } from '../api/client';
 import { DutyLedgerRow, Employee } from '../types/domain';
 import { ApiError } from '../types/api';
+import { useMyRole } from '../hooks/useMyRole';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 import { AlertBar } from '../components/ui/AlertBar';
 import { RTable, RTableColumn } from '../components/ui/RTable';
@@ -40,6 +41,7 @@ export default function DutyLedger() {
   const bp = useBreakpoint();
   const mobile = isMobile(bp);
   const queryClient = useQueryClient();
+  const { isSupervisorOrAdmin } = useMyRole();
 
   const [date, setDate] = useState(TODAY);
   const [platoonFilter, setPlatoonFilter] = useState('');
@@ -63,6 +65,7 @@ export default function DutyLedger() {
   const rows = (data ?? []).filter((r) => !platoonFilter || r.platoon === platoonFilter);
 
   const trainToggle = (r: DutyLedgerRow) => {
+    if (!isSupervisorOrAdmin) return <span>—</span>;
     if (r.duty_status !== 'O' && r.duty_status !== 'Train') return <span>—</span>;
     const toTrain = r.duty_status === 'O';
     return (
@@ -71,6 +74,7 @@ export default function DutyLedger() {
         disabled={setDutyStatus.isPending}
         style={{
           padding: '4px 10px',
+          minHeight: mobile ? MIN_TAP_TARGET : undefined,
           borderRadius: 6,
           fontSize: 11,
           fontWeight: 600,
@@ -167,12 +171,12 @@ export default function DutyLedger() {
         )
       )}
 
-      <DetAssignmentCard t={t} date={date} />
+      <DetAssignmentCard t={t} date={date} canAssign={isSupervisorOrAdmin} />
     </div>
   );
 }
 
-function DetAssignmentCard({ t, date }: { t: ReturnType<typeof tokensFor>; date: string }) {
+function DetAssignmentCard({ t, date, canAssign }: { t: ReturnType<typeof tokensFor>; date: string; canAssign: boolean }) {
   const queryClient = useQueryClient();
   const bp = useBreakpoint();
   const mobile = isMobile(bp);
@@ -241,50 +245,52 @@ function DetAssignmentCard({ t, date }: { t: ReturnType<typeof tokensFor>; date:
         detail during approved leave, will be rejected.
       </p>
 
-      {detError && <AlertBar t={t} type="crit">{detError}</AlertBar>}
-      {detOk && !detError && (
+      {canAssign && detError && <AlertBar t={t} type="crit">{detError}</AlertBar>}
+      {canAssign && detOk && !detError && (
         <div style={{ fontSize: 12, color: t.ok, marginBottom: 10 }}>{detOk}</div>
       )}
 
-      <div style={{ display: 'flex', flexDirection: mobile ? 'column' : 'row', gap: 10, flexWrap: 'wrap', marginBottom: 12 }}>
-        <select value={employeeId} onChange={(e) => setEmployeeId(e.target.value)} style={{ ...inputStyle, minWidth: mobile ? undefined : 200 }}>
-          <option value="">Select employee…</option>
-          {sortedEmployees.map((e) => (
-            <option key={e.id} value={e.id}>
-              {e.last_name}, {e.first_name} ({e.rank} · {e.platoon})
-            </option>
-          ))}
-        </select>
-        <input
-          type="text"
-          placeholder="Detail location (e.g. E148 / Station 14)"
-          value={location}
-          onChange={(e) => setLocation(e.target.value)}
-          style={{ ...inputStyle, flex: mobile ? undefined : 1, minWidth: mobile ? undefined : 200 }}
-        />
-        <div style={{ display: 'flex', gap: 10 }}>
-          <input type="time" value={spanStart} onChange={(e) => setSpanStart(e.target.value)} style={{ ...inputStyle, flex: mobile ? 1 : undefined }} />
-          <input type="time" value={spanEnd} onChange={(e) => setSpanEnd(e.target.value)} style={{ ...inputStyle, flex: mobile ? 1 : undefined }} />
+      {canAssign && (
+        <div style={{ display: 'flex', flexDirection: mobile ? 'column' : 'row', gap: 10, flexWrap: 'wrap', marginBottom: 12 }}>
+          <select value={employeeId} onChange={(e) => setEmployeeId(e.target.value)} style={{ ...inputStyle, minWidth: mobile ? undefined : 200 }}>
+            <option value="">Select employee…</option>
+            {sortedEmployees.map((e) => (
+              <option key={e.id} value={e.id}>
+                {e.last_name}, {e.first_name} ({e.rank} · {e.platoon})
+              </option>
+            ))}
+          </select>
+          <input
+            type="text"
+            placeholder="Detail location (e.g. E148 / Station 14)"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            style={{ ...inputStyle, flex: mobile ? undefined : 1, minWidth: mobile ? undefined : 200 }}
+          />
+          <div style={{ display: 'flex', gap: 10 }}>
+            <input type="time" value={spanStart} onChange={(e) => setSpanStart(e.target.value)} style={{ ...inputStyle, flex: mobile ? 1 : undefined }} />
+            <input type="time" value={spanEnd} onChange={(e) => setSpanEnd(e.target.value)} style={{ ...inputStyle, flex: mobile ? 1 : undefined }} />
+          </div>
+          <button
+            onClick={() => createDet.mutate()}
+            disabled={createDet.isPending || !employeeId || !location}
+            style={{
+              padding: '8px 16px',
+              minHeight: mobile ? MIN_TAP_TARGET : undefined,
+              borderRadius: 6,
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: 'pointer',
+              border: `1px solid ${t.pB}`,
+              background: t.pB,
+              color: '#fff',
+              opacity: createDet.isPending || !employeeId || !location ? 0.6 : 1,
+            }}
+          >
+            Assign
+          </button>
         </div>
-        <button
-          onClick={() => createDet.mutate()}
-          disabled={createDet.isPending || !employeeId || !location}
-          style={{
-            padding: '8px 16px',
-            minHeight: mobile ? MIN_TAP_TARGET : undefined,
-            borderRadius: 6,
-            fontSize: 13,
-            fontWeight: 600,
-            cursor: 'pointer',
-            border: `1px solid ${t.pB}`,
-            background: t.pB,
-            color: '#fff',
-            opacity: createDet.isPending || !employeeId || !location ? 0.6 : 1,
-          }}
-        >
-          Assign
-        </button>
-      </div>
+      )}
 
       <RTable
         t={t}

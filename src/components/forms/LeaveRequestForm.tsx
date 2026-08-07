@@ -8,7 +8,6 @@ import { apiGet } from '../../api/client';
 import { Employee } from '../../types/domain';
 import { useLeaveSlots, useSubmitLeave } from '../../hooks/useLeaveSlots';
 import { SlotBar } from '../ui/SlotBar';
-import { StatusChip } from '../ui/StatusChip';
 import { MIN_TAP_TARGET } from '../../theme/spacing';
 
 const LEAVE_TYPES = ['AL', 'EAL', 'SL', 'ISSL', 'FODI', 'ADM', 'AWOL', 'FL', 'CT', 'CL', 'DET', 'MWA'] as const;
@@ -147,12 +146,11 @@ export function LeaveRequestForm({ t, bp }: LeaveRequestFormProps) {
         </div>
       )}
 
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-        <StatusChip t={t} status={employeeId ? 'Granted' : 'PendingApproval'} />
-        <span style={{ fontSize: 11, color: t.textFaint }}>
-          {employeeId ? 'Employee selected' : 'Select an employee to continue'}
-        </span>
-      </div>
+      <p style={{ fontSize: 11, color: t.textFaint, margin: 0 }}>
+        {employeeId
+          ? 'This request will be submitted as Pending Approval. A supervisor must review it before it counts as granted.'
+          : 'Select an employee to continue.'}
+      </p>
 
       {submitLeave.isError && (
         <p style={{ color: t.crit, fontSize: 13 }}>

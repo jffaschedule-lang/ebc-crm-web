@@ -12,9 +12,10 @@ import { MIN_TAP_TARGET } from '../../theme/spacing';
 interface TabProps {
   t: ThemeTokens;
   bp: Breakpoint;
+  isAdmin: boolean;
 }
 
-export function SystemSettingsTab({ t, bp }: TabProps) {
+export function SystemSettingsTab({ t, bp, isAdmin }: TabProps) {
   const mobile = isMobile(bp);
   const queryClient = useQueryClient();
 
@@ -44,6 +45,11 @@ export function SystemSettingsTab({ t, bp }: TabProps) {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       <Card t={t}>
         <h3 style={{ fontSize: 14, fontWeight: 650, color: t.text, marginTop: 0, marginBottom: 10 }}>System Settings</h3>
+        {!isAdmin && (
+          <AlertBar t={t} type="warn">
+            You're viewing this in read-only mode. Changing these values requires the admin role.
+          </AlertBar>
+        )}
         {isLoading && <LoadingSpinner t={t} />}
         {error && <AlertBar t={t} type="crit">Couldn't load system settings. Check your connection and reload.</AlertBar>}
         {!isLoading && !error && (data ?? []).length === 0 && (

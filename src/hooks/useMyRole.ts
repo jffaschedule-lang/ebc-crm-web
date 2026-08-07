@@ -21,5 +21,8 @@ export function useMyRole() {
   const isAdmin = roles.includes('admin');
   const isSupervisorOrAdmin = roles.includes('supervisor') || isAdmin;
 
-  return { roles, isAdmin, isSupervisorOrAdmin, isLoading };
+  // The employee record's id — NOT the same as the Supabase Auth user id
+  // (session.user.id). Anything writing to a table with an employee_id
+  // foreign key (e.g. ot_availability) must use this value, not auth.user.id.
+  return { roles, isAdmin, isSupervisorOrAdmin, isLoading, employeeId: data?.employeeId ?? null };
 }

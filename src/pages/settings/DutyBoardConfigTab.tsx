@@ -6,6 +6,7 @@ import { Breakpoint, isMobile } from '../../hooks/useBreakpoint';
 import { apiGet, apiPatch } from '../../api/client';
 import { useSystemInfo } from '../../hooks/useAdmin';
 import { useGenerateDutyLedger } from '../../hooks/useDutyLedger';
+import { useMyRole } from '../../hooks/useMyRole';
 import { Setting } from '../../types/domain';
 import { Card } from '../../components/ui/Card';
 import { AlertBar } from '../../components/ui/AlertBar';
@@ -15,13 +16,15 @@ import { MIN_TAP_TARGET } from '../../theme/spacing';
 interface TabProps {
   t: ThemeTokens;
   bp: Breakpoint;
+  isAdmin: boolean;
 }
 
 const TODAY = format(new Date(), 'yyyy-MM-dd');
 
-export function DutyBoardConfigTab({ t, bp }: TabProps) {
+export function DutyBoardConfigTab({ t, bp, isAdmin }: TabProps) {
   const mobile = isMobile(bp);
   const queryClient = useQueryClient();
+  const { isSupervisorOrAdmin } = useMyRole();
   const { data: settings, isLoading } = useQuery({
     queryKey: ['settings'],
     queryFn: () => apiGet<Setting[]>('/api/settings'),
@@ -81,16 +84,21 @@ export function DutyBoardConfigTab({ t, bp }: TabProps) {
       <h2 style={{ fontSize: 17, fontWeight: 650, color: t.text, margin: 0 }}>Duty Board &amp; Shift Configuration</h2>
 
       <Card t={t}>
+        {!isAdmin && (
+          <AlertBar t={t} type="warn">
+            You're viewing this in read-only mode. Changing these values requires the admin role.
+          </AlertBar>
+        )}
         {(isLoading || infoLoading) && <LoadingSpinner t={t} />}
         {!isLoading && !infoLoading && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div style={rowStyle}>
               <label style={labelStyle}>Shift start time</label>
-              <input type="time" value={shiftStartDraft} onChange={(e) => setShiftStartDraft(e.target.value)} style={inputStyle} />
+              <input type="time" value={shiftStartDraft} disabled={!isAdmin} onChange={(e) => setShiftStartDraft(e.target.value)} style={inputStyle} />
               <button
                 type="button"
                 onClick={() => saveSetting.mutate({ key: 'shift_start_time', value: shiftStartDraft })}
-                disabled={saveSetting.isPending}
+                disabled={!isAdmin || saveSetting.isPending}
                 style={{ padding: '8px 16px', minHeight: mobile ? MIN_TAP_TARGET : undefined, borderRadius: 6, border: 'none', background: t.pA, color: '#fff', fontWeight: 600, fontSize: 13, cursor: 'pointer' }}
               >
                 Save
@@ -103,13 +111,14 @@ export function DutyBoardConfigTab({ t, bp }: TabProps) {
                 type="number"
                 min={0}
                 value={alSlotsDraft}
+                disabled={!isAdmin}
                 onChange={(e) => setAlSlotsDraft(e.target.value)}
                 style={{ ...inputStyle, width: mobile ? undefined : 100 }}
               />
               <button
                 type="button"
                 onClick={() => saveSetting.mutate({ key: 'max_al_slots_per_shift', value: alSlotsDraft })}
-                disabled={saveSetting.isPending}
+                disabled={!isAdmin || saveSetting.isPending}
                 style={{ padding: '8px 16px', minHeight: mobile ? MIN_TAP_TARGET : undefined, borderRadius: 6, border: 'none', background: t.pA, color: '#fff', fontWeight: 600, fontSize: 13, cursor: 'pointer' }}
               >
                 Save
@@ -123,12 +132,13 @@ export function DutyBoardConfigTab({ t, bp }: TabProps) {
                 role="switch"
                 aria-checked={autoGenOn}
                 onClick={() => saveSetting.mutate({ key: 'auto_generate_duty_ledger', value: autoGenOn ? 'false' : 'true' })}
-                disabled={saveSetting.isPending || !autoGenSetting}
+                disabled={!isAdmin || saveSetting.isPending || !autoGenSetting}
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
-                  width: 44,
-                  height: 24,
+                  width: mobile ? 52 : 44,
+                  height: mobile ? 30 : 24,
+                  minWidth: mobile ? MIN_TAP_TARGET : undefined,
                   padding: 2,
                   borderRadius: 999,
                   border: 'none',
@@ -139,11 +149,11 @@ export function DutyBoardConfigTab({ t, bp }: TabProps) {
               >
                 <span
                   style={{
-                    width: 20,
-                    height: 20,
+                    width: mobile ? 26 : 20,
+                    height: mobile ? 26 : 20,
                     borderRadius: '50%',
                     background: '#fff',
-                    transform: autoGenOn ? 'translateX(20px)' : 'translateX(0)',
+                    transform: autoGenOn ? `translateX(${mobile ? 22 : 20}px)` : 'translateX(0)',
                     transition: 'transform 120ms ease',
                     display: 'block',
                   }}
@@ -177,44 +187,53 @@ export function DutyBoardConfigTab({ t, bp }: TabProps) {
 
       <Card t={t}>
         <h3 style={{ fontSize: 14, fontWeight: 650, color: t.text, marginTop: 0, marginBottom: 10 }}>Duty Ledger Tools</h3>
-        <div style={{ display: 'flex', flexDirection: mobile ? 'column' : 'row', gap: 10, alignItems: mobile ? 'stretch' : 'center' }}>
-          <input
-            type="date"
-            value={genDate}
-            onChange={(e) => setGenDate(e.target.value)}
-            style={inputStyle}
-          />
-          <button
-            type="button"
-            onClick={() =>
-              generateLedger.mutate(genDate, { onSuccess: () => setGenSuccess(`Duty ledger generated for ${genDate}.`) })
-            }
-            disabled={generateLedger.isPending}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 8,
-              padding: '8px 16px',
-              minHeight: mobile ? MIN_TAP_TARGET : undefined,
-              borderRadius: 6,
-              border: 'none',
-              background: t.pA,
-              color: '#fff',
-              fontWeight: 600,
-              fontSize: 13,
-              cursor: generateLedger.isPending ? 'default' : 'pointer',
-              opacity: generateLedger.isPending ? 0.7 : 1,
-            }}
-          >
-            {generateLedger.isPending && <InlineSpinner size={11} />}
-            {generateLedger.isPending ? 'Generating…' : 'Generate Ledger for Date'}
-          </button>
-        </div>
-        {genSuccess && <AlertBar t={t} type="ok">{genSuccess}</AlertBar>}
-        {generateLedger.isError && (
-          <AlertBar t={t} type="crit">
-            {(generateLedger.error as { error?: { message?: string } })?.error?.message ?? 'Failed to generate duty ledger.'}
+        {!isSupervisorOrAdmin && (
+          <AlertBar t={t} type="warn">
+            Generating a duty ledger requires the supervisor or admin role.
           </AlertBar>
+        )}
+        {isSupervisorOrAdmin && (
+          <>
+            <div style={{ display: 'flex', flexDirection: mobile ? 'column' : 'row', gap: 10, alignItems: mobile ? 'stretch' : 'center' }}>
+              <input
+                type="date"
+                value={genDate}
+                onChange={(e) => setGenDate(e.target.value)}
+                style={inputStyle}
+              />
+              <button
+                type="button"
+                onClick={() =>
+                  generateLedger.mutate(genDate, { onSuccess: () => setGenSuccess(`Duty ledger generated for ${genDate}.`) })
+                }
+                disabled={generateLedger.isPending}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  padding: '8px 16px',
+                  minHeight: mobile ? MIN_TAP_TARGET : undefined,
+                  borderRadius: 6,
+                  border: 'none',
+                  background: t.pA,
+                  color: '#fff',
+                  fontWeight: 600,
+                  fontSize: 13,
+                  cursor: generateLedger.isPending ? 'default' : 'pointer',
+                  opacity: generateLedger.isPending ? 0.7 : 1,
+                }}
+              >
+                {generateLedger.isPending && <InlineSpinner size={11} />}
+                {generateLedger.isPending ? 'Generating…' : 'Generate Ledger for Date'}
+              </button>
+            </div>
+            {genSuccess && <AlertBar t={t} type="ok">{genSuccess}</AlertBar>}
+            {generateLedger.isError && (
+              <AlertBar t={t} type="crit">
+                {(generateLedger.error as { error?: { message?: string } })?.error?.message ?? 'Failed to generate duty ledger.'}
+              </AlertBar>
+            )}
+          </>
         )}
       </Card>
     </div>

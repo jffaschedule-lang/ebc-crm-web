@@ -14,20 +14,26 @@ import { MIN_TAP_TARGET } from '../../theme/spacing';
 interface TabProps {
   t: ThemeTokens;
   bp: Breakpoint;
+  isAdmin: boolean;
 }
 
-export function NotificationsTab({ t, bp }: TabProps) {
+export function NotificationsTab({ t, bp, isAdmin }: TabProps) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       <h2 style={{ fontSize: 17, fontWeight: 650, color: t.text, margin: 0 }}>Email &amp; Notification Configuration</h2>
-      <EmailSettingsSection t={t} bp={bp} />
-      <NotificationRulesSection t={t} bp={bp} />
-      <ShiftPacketScheduleSection t={t} bp={bp} />
+      {!isAdmin && (
+        <AlertBar t={t} type="warn">
+          You're viewing this in read-only mode. Changing notification settings requires the admin role.
+        </AlertBar>
+      )}
+      <EmailSettingsSection t={t} bp={bp} isAdmin={isAdmin} />
+      <NotificationRulesSection t={t} bp={bp} isAdmin={isAdmin} />
+      <ShiftPacketScheduleSection t={t} bp={bp} isAdmin={isAdmin} />
     </div>
   );
 }
 
-function EmailSettingsSection({ t, bp }: TabProps) {
+function EmailSettingsSection({ t, bp, isAdmin }: TabProps) {
   const mobile = isMobile(bp);
   const queryClient = useQueryClient();
   const { data: settings, isLoading: settingsLoading } = useQuery({
@@ -67,13 +73,14 @@ function EmailSettingsSection({ t, bp }: TabProps) {
             <input
               placeholder={fromEmailSetting?.value ?? 'crm@ebc-fire.org'}
               defaultValue={fromEmailSetting?.value ?? ''}
+              disabled={!isAdmin}
               onChange={(e) => setFromEmailDraft(e.target.value)}
               style={{ ...inputStyle, flex: 1 }}
             />
             <button
               type="button"
               onClick={() => updateFromEmail.mutate(fromEmailDraft || fromEmailSetting?.value || '')}
-              disabled={updateFromEmail.isPending}
+              disabled={!isAdmin || updateFromEmail.isPending}
               style={{
                 padding: '8px 16px',
                 minHeight: mobile ? MIN_TAP_TARGET : undefined,
@@ -118,7 +125,7 @@ function EmailSettingsSection({ t, bp }: TabProps) {
             <button
               type="button"
               onClick={() => sendTestEmail.mutate(testTo)}
-              disabled={!testTo || sendTestEmail.isPending}
+              disabled={!isAdmin || !testTo || sendTestEmail.isPending}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -131,8 +138,8 @@ function EmailSettingsSection({ t, bp }: TabProps) {
                 color: '#fff',
                 fontWeight: 600,
                 fontSize: 13,
-                cursor: !testTo || sendTestEmail.isPending ? 'default' : 'pointer',
-                opacity: !testTo || sendTestEmail.isPending ? 0.6 : 1,
+                cursor: !isAdmin || !testTo || sendTestEmail.isPending ? 'default' : 'pointer',
+                opacity: !isAdmin || !testTo || sendTestEmail.isPending ? 0.6 : 1,
               }}
             >
               {sendTestEmail.isPending && <InlineSpinner size={11} />}
@@ -153,7 +160,7 @@ function EmailSettingsSection({ t, bp }: TabProps) {
   );
 }
 
-function NotificationRulesSection({ t, bp }: TabProps) {
+function NotificationRulesSection({ t, bp, isAdmin }: TabProps) {
   const mobile = isMobile(bp);
   const { data, isLoading, error } = useNotificationRules(true);
   const updateRule = useUpdateNotificationRule();
@@ -167,19 +174,24 @@ function NotificationRulesSection({ t, bp }: TabProps) {
       key: 'enabled',
       header: 'Enabled',
       render: (r) => (
-        <input
-          type="checkbox"
-          checked={r.enabled}
-          onChange={(e) => updateRule.mutate({ event: r.event, changes: { enabled: e.target.checked } })}
-          style={{ width: 18, height: 18 }}
-        />
+        <div style={{ display: 'flex', alignItems: 'center', minHeight: mobile ? MIN_TAP_TARGET : undefined }}>
+          <input
+            type="checkbox"
+            checked={r.enabled}
+            disabled={!isAdmin}
+            onChange={(e) => updateRule.mutate({ event: r.event, changes: { enabled: e.target.checked } })}
+            style={{ width: 18, height: 18 }}
+          />
+        </div>
       ),
     },
     {
       key: 'recipients',
       header: 'Recipients',
       render: (r) =>
-        editingEvent === r.event ? (
+        !isAdmin ? (
+          r.recipients
+        ) : editingEvent === r.event ? (
           <input
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
@@ -202,7 +214,9 @@ function NotificationRulesSection({ t, bp }: TabProps) {
       key: 'action',
       header: 'Action',
       render: (r) =>
-        editingEvent === r.event ? (
+        !isAdmin ? (
+          <span style={{ color: t.textFaint }}>—</span>
+        ) : editingEvent === r.event ? (
           <div style={{ display: 'flex', gap: 6 }}>
             <button
               type="button"
@@ -283,7 +297,7 @@ function NotificationRulesSection({ t, bp }: TabProps) {
   );
 }
 
-function ShiftPacketScheduleSection({ t, bp }: TabProps) {
+function ShiftPacketScheduleSection({ t, bp, isAdmin }: TabProps) {
   const mobile = isMobile(bp);
   const queryClient = useQueryClient();
   const { data: settings, isLoading } = useQuery({
@@ -319,6 +333,7 @@ function ShiftPacketScheduleSection({ t, bp }: TabProps) {
             <input
               type="time"
               value={timeDraft}
+              disabled={!isAdmin}
               onChange={(e) => setTimeDraft(e.target.value)}
               style={{
                 padding: '8px 10px',
@@ -333,7 +348,7 @@ function ShiftPacketScheduleSection({ t, bp }: TabProps) {
             <button
               type="button"
               onClick={() => updatePacketTime.mutate(timeDraft)}
-              disabled={updatePacketTime.isPending}
+              disabled={!isAdmin || updatePacketTime.isPending}
               style={{
                 padding: '8px 16px',
                 minHeight: mobile ? MIN_TAP_TARGET : undefined,

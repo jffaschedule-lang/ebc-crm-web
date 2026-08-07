@@ -25,8 +25,10 @@ export function Layout() {
       )}
       <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
         <Topbar />
-        <main style={{ flex: 1, padding: mobile ? '16px 12px 72px' : '20px 24px', minWidth: 0 }}>
-          <Outlet />
+        <main className="app-main" style={{ flex: 1, minWidth: 0 }}>
+          <div className="app-main-inner">
+            <Outlet />
+          </div>
         </main>
         <BottomNav />
       </div>
